@@ -58,6 +58,7 @@ export async function resolveTemplate(
             const stringified = typeof resolvedValue === "object"
                 ? JSON.stringify(resolvedValue)
                 : String(resolvedValue);
+            console.warn(`[Template Engine] Could not resolve: ${path}. Falling back to raw string.`);
 
             resolvedString = resolvedString.replaceAll(fullMatch, stringified);
         } else {

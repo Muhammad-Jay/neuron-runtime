@@ -1,16 +1,11 @@
 "use server";
 
-import {NewWorkflow, Workflow} from "../../../backend/src/types/workflow/workflow.types";
-import {createClient} from "@/lib/supabase/client";
 import {authorizedFetch} from "@/lib/api-client/authorizeFetch";
-import {WorkflowNode} from "../../../shared/src/types/node.types";
-import {WorkflowEdge} from "../../../shared/src/types/edge.type";
-import {GlobalVariable, WorkflowDefinition} from "../../../shared/src/types/workflow.types";
-import {globalVariables} from "../../../backend/src/schemas";
+import type {WorkflowDefinition, GlobalVariable} from "@neuron/shared";
 
-const URL = process.env.BACKEND_ENDPOINT! as string;
+const URL = process.env.NEXT_PUBLIC_API_ENDPOINT! as string;
 
-export async function createWorkflowRequest(data: NewWorkflow, accessToken: any){
+export async function createWorkflowRequest(data: any, accessToken: any){
     const ENDPOINT = `${URL}/workflows`;
     try {
         const options = {

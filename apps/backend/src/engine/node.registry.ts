@@ -244,8 +244,10 @@ export const nodeRegistry: any = {
      * RESPOND NODE: The Terminal Sink
      * This node signals the end of a workflow execution cycle.
      */
-    respondNode: async ({ node }: { node: any }) => {
+    respondNode: async ({ node, inputs }: { node: any, inputs: any }) => {
         const { statusCode, body, headers } = node.config;
+
+        console.log("Respond Node Config received:", node.config);
 
         return {
             __isTerminal: true,

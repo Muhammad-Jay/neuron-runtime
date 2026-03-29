@@ -98,6 +98,9 @@ export async function executeWorkflow(
             const executor = nodeRegistry[node.type];
             if (!executor) throw new Error(`No executor found for type: ${node.type}`);
 
+            await new Promise(r => setTimeout(r, 400));
+
+            console.log(`from ${node.type}: `, resolvedConfig)
             const output = await executor({
                 node: { ...node, config: resolvedConfig },
                 // Pass the first available parent output as a direct input for simple nodes
@@ -106,6 +109,7 @@ export async function executeWorkflow(
 
             // --- NEW: CAPTURE TERMINAL DATA ---
             if (output && output.__isTerminal) {
+                console.log("Respond Node output: ", output);
                 finalResponse = {
                     status: output.status,
                     headers: output.headers,

@@ -175,22 +175,20 @@ export const executeDeployedWorkflowController = async (req: any, res: any) => {
             .then((finalContext) => {
                 console.log(`Workflow ${workflowId} finished.`);
 
-                if (finalContext.response) {
-                    const { status, body, headers } = finalContext.response;
+                const { status, body, headers } = finalContext.response;
 
-                    if (headers) {
-                        res.set(headers);
-                    }
-
-                    return res.status(status || 200).json(body);
+                if (headers) {
+                    res.set(headers);
                 }
 
-                return res.status(200).json({
-                    success: true,
-                    message: "Workflow executed successfully.",
-                    // Optional: return context in dev mode
-                    // data: finalContext.nodesContext
-                });
+                return res.status(status || 200).json(body);
+
+                // return res.status(200).json({
+                //     success: true,
+                //     message: "Workflow executed successfully.",
+                //     // Optional: return context in dev mode
+                //     // data: finalContext.nodesContext
+                // });
             })
             .catch(err => {
                 console.error(`Workflow ${workflowId} failed:`, err);

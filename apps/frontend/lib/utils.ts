@@ -37,7 +37,7 @@ export function getSupabaseEnvironmentVariables()
 }
 
 export function getBackendEndpoint(): string{
-    return process.env.BACKEND_ENDPOINT ?? "http://localhost:5000/api/v1";
+    return process.env.NEXT_PUBLIC_API_ENDPOINT ?? "http://localhost:5000/api/v1";
 }
 
 export function convertFieldInputToSchema(fields: FieldInput[]): Record<string, SchemaField> {
