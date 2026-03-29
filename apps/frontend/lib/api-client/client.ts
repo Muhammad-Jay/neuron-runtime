@@ -1,0 +1,156 @@
+"use server";
+
+import {NewWorkflow, Workflow} from "../../../backend/src/types/workflow/workflow.types";
+import {createClient} from "@/lib/supabase/client";
+import {authorizedFetch} from "@/lib/api-client/authorizeFetch";
+import {WorkflowNode} from "../../../shared/src/types/node.types";
+import {WorkflowEdge} from "../../../shared/src/types/edge.type";
+import {GlobalVariable, WorkflowDefinition} from "../../../shared/src/types/workflow.types";
+import {globalVariables} from "../../../backend/src/schemas";
+
+const URL = process.env.BACKEND_ENDPOINT! as string;
+
+export async function createWorkflowRequest(data: NewWorkflow, accessToken: any){
+    const ENDPOINT = `${URL}/workflows`;
+    try {
+        const options = {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify(data),
+        }
+        const response = await fetch(ENDPOINT, options);
+
+        if (!response.ok) {
+            throw new Error(response.statusText);
+        }
+
+        const json = await response.json();
+        return ({ success: true, data: json.data });
+
+    }catch (e) {
+
+        return ({ success: false, error: e.message });
+    }
+}
+
+export async function getWorkflowsRequest(token: string) {
+    const ENDPOINT = `${URL}/workflows`;
+
+    try {
+        const options = {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            }
+        };
+
+        const response = await fetch(ENDPOINT, options);
+
+        if (!response.ok) {
+            // Provide more context on failure
+            const errorBody = await response.text();
+            throw new Error(`Request failed: ${response.status} ${response.statusText} - ${errorBody}`);
+        }
+
+        const json = await response.json();
+        return { success: true, data: json.data };
+
+    } catch (e) {
+        console.error("Workflow Request Error:", e.message);
+        return { success: false, error: e.message };
+    }
+}
+
+export async function getWorkflowGraphRequest(workflowId: string, token: any) {
+
+    const url = `${URL}/workflows/${workflowId}/graph`;
+    const options = {
+        method: "GET",
+    };
+
+    return await authorizedFetch(url, options, token);
+}
+
+export async function saveWorkflowGraphRequest(workflowId: string, token: any, payload: { graph: WorkflowDefinition, globalVariables: GlobalVariable[]}) {
+
+    const url = `${URL}/workflows/${workflowId}/graph`;
+    const options = {
+        method: "POST",
+        body: JSON.stringify({ graph: payload.graph, globalVariables: payload.globalVariables }),
+    };
+
+    return await authorizedFetch(url, options, token);
+}
+
+export async function getSecretRequest(token = null as any){
+
+    const url = `${URL}/secrets`;
+    const options = {
+        method: "GET",
+    };
+
+    return await authorizedFetch(url, options, token);
+}
+
+export async function createSecretRequest(name: string, value: string, token: any, ){
+
+    const url = `${URL}/secrets`;
+    const options = {
+        method: "POST",
+        body: JSON.stringify({ name, value }),
+    };
+
+    return await authorizedFetch(url, options, token);
+}
+
+export async function deleteSecretRequest(id: string, token: any){
+
+    const url = `${URL}/secrets/delete/${id}`;
+    const options = {
+        method: "DELETE"
+    }
+    return await authorizedFetch(url, options, token);
+}
+
+// Run workflow
+export async function runWorkflowRequest(runId: string, graph: WorkflowDefinition, token: any){
+    const url = `${URL}/workflows/execute/${runId}`;
+
+    const options = {
+        method: "GET",
+    }
+
+    return await authorizedFetch(url, options, token);
+}
+
+export async function deployWorkflowRequest(workflowId: string, data, token: any){
+    const url = `${URL}/workflows/deploy/${workflowId}`;
+    const options = {
+        method: "POST",
+        body: JSON.stringify({ ...data }),
+    };
+
+    return await authorizedFetch(url, options, token);
+}
+
+export async function getDeployWorkflowRequest(workflowId: string, token: any){
+    const url = `${URL}/workflows/deploy/${workflowId}`;
+    const options = {
+        method: "GET",
+    };
+
+    return await authorizedFetch(url, options, token);
+}
+
+export async function deleteDeploymentRequest(workflowId: string, token: any){
+    const url = `${URL}/workflows/deploy/${workflowId}`;
+    const options = {
+        method: "DELETE",
+    };
+
+    return await authorizedFetch(url, options, token);
+}

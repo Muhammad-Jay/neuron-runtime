@@ -1,0 +1,23 @@
+{
+  "name": "@neuron/shared",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dict/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [],
+  "author": "muhammed awaisu ahmed",
+  "license": "ISC",
+  "description": "neuron shared package",
+  "dependencies": {
+    "drizzle-orm": "^0.45.1"
+  }
+}

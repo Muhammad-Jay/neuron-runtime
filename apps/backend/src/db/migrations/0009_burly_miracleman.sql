@@ -1,0 +1,1 @@
+ALTER TABLE "deployed_workflows" ADD CONSTRAINT "deployed_workflows_workflow_id_workflows_id_fk" FOREIGN KEY ("workflow_id") REFERENCES "public"."workflows"("id") ON DELETE no action ON UPDATE no action;
