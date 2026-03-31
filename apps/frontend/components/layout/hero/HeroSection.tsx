@@ -9,13 +9,16 @@ import { FabricReveal } from "./TerminalReveal"
 import { AppButton } from "@/components/CustomButton"
 import { Rocket, ArrowRight } from "lucide-react"
 import { useHeroBridge } from "@/hooks/use-hero-bridge"
+import {HeroBackground} from "@/components/layout/hero/background/HeroBackground";
+import {useRouter} from "next/navigation";
 
-const SECTIONS = ["intro", "features", "capabilities", "demos"] as const
+const SECTIONS = ["intro", "any", "features", "capabilities", "demos"] as const
 export type SectionType = typeof SECTIONS[number]
 
 export const HeroSection = memo(function HeroSection() {
     const containerRef = useRef<HTMLDivElement>(null)
-    const cardRefs = useRef<(HTMLDivElement | null)[]>([])
+    const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const router = useRouter();
     const [ballPos, setBallPos] = useState({ x: 0, y: 0 })
 
     const { activeSection, scrollYProgress, transforms } = useHeroBridge(containerRef)
@@ -25,15 +28,18 @@ export const HeroSection = memo(function HeroSection() {
     }, [])
 
     return (
-        <div ref={containerRef} className="relative h-[600vh] bg-black text-white overflow-clip">
+        <div ref={containerRef} className="relative h-[600vh]  text-white overflow-clip">
+
+            {/* 1. THE ATMOSPHERE (Deepest Layer) */}
+            <HeroBackground />
 
             {/* LAYER 1: THE FLOATING HERO */}
             <motion.div
                 style={transforms.heroExit}
                 className="sticky top-0 h-screen w-full flex items-center justify-center z-20 pointer-events-none"
             >
-                {/* Background radial glow */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(24,24,27,1)_0%,rgba(0,0,0,1)_50%)]" />
+                {/*/!* Background radial glow *!/*/}
+                {/*<div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(24,24,27,1)_0%,rgba(0,0,0,1)_50%)]" />*/}
 
                 {/* Status Overlays */}
                 <motion.div style={{ opacity: scrollYProgress.get() > 0.12 ? 1 : 0 }} className="transition-opacity duration-500">
@@ -53,8 +59,14 @@ export const HeroSection = memo(function HeroSection() {
                                     <div className="w-8 h-[1px] bg-primary" />
                                     <span className="text-primary text-[10px] font-black uppercase tracking-[0.5em]">Neuron v3.0</span>
                                 </motion.div>
-                                <h1 className="text-7xl md:text-9xl font-black tracking-tighter leading-[0.85]">
-                                    BEYOND <br/> <span className="text-neutral-600 italic">CODE.</span>
+                                <h1 className="text-7xl md:text-9xl font-black tracking-tighter leading-[0.85] select-none">
+    <span className="inline-block bg-gradient-to-b from-foreground via-foreground/90 to-foreground/40 bg-clip-text text-transparent drop-shadow-[0_5px_15px_rgba(255,255,255,0.05)]">
+        BEYOND
+    </span>
+                                    <br />
+                                    <span className="text-neutral-600 italic font-light opacity-80">
+        CODE.
+    </span>
                                 </h1>
                                 <p className="text-neutral-500 max-w-sm text-sm leading-relaxed font-medium">
                                     Autonomous backend orchestration kernel. <br/>
@@ -62,8 +74,12 @@ export const HeroSection = memo(function HeroSection() {
                                 </p>
                             </div>
                             <div className="flex items-center gap-5">
-                                <AppButton label="Initialize" icon={<Rocket size={14} />} className="bg-white text-black px-10 py-7 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-2xl active:scale-95 transition-transform" />
-                                <AppButton label="Docs" variant="ghost" icon={<ArrowRight size={14} />} className="text-neutral-400 px-10 py-7 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:text-white" />
+                                <AppButton
+                                    onClick={() => router.push("/sign-in")}
+                                    label="Get Started" icon={<Rocket size={14} />} className="bg-white text-black px-10 py-7 rounded-2xl font-black uppercase text-[12px] tracking-widest transition-300 shadow-2xl active:scale-95 transition-transform" />
+                                <AppButton
+                                    onClick={() => router.push("/sign-in")}
+                                    label="Explore" variant="ghost" icon={<ArrowRight size={14} />} className="text-neutral-400 px-10 py-7 rounded-2xl font-black uppercase transition-300 text-[10px] tracking-widest hover:bg-white hover:text-neutral-800" />
                             </div>
                         </motion.div>
                     </div>
@@ -80,8 +96,7 @@ export const HeroSection = memo(function HeroSection() {
                                 <HeroSphere section={activeSection} onBallUpdate={handleBallUpdate} />
                             </div>
 
-                            <FloatingElements side="left" section={activeSection} cardRefs={cardRefs} />
-                            <FloatingElements side="right" section={activeSection} cardRefs={cardRefs} />
+                            <FloatingElements section={activeSection} cardRefs={cardRefs} />
                         </div>
                     </motion.div>
                 </div>

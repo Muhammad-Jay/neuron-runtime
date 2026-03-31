@@ -38,19 +38,19 @@ export async function updateSession(request: NextRequest) {
     // 3. Handle Redirects
     const url = request.nextUrl.clone()
 
-    if ((!user && url.pathname.startsWith('/dashboard')) || (!user && url.pathname.startsWith('/editor'))) {
-        url.pathname = '/sign-in'
-        const redirectResponse = NextResponse.redirect(url)
-        cookiesToSetInRedirect(supabaseResponse, redirectResponse)
-        return redirectResponse
-    }
-
-    if (user && (url.pathname === '/sign-in' || url.pathname === '/sign-up')) {
-        url.pathname = '/dashboard'
-        const redirectResponse = NextResponse.redirect(url)
-        cookiesToSetInRedirect(supabaseResponse, redirectResponse)
-        return redirectResponse
-    }
+    // if ((!user && url.pathname.startsWith('/dashboard')) || (!user && url.pathname.startsWith('/editor'))) {
+    //     url.pathname = '/sign-in'
+    //     const redirectResponse = NextResponse.redirect(url)
+    //     cookiesToSetInRedirect(supabaseResponse, redirectResponse)
+    //     return redirectResponse
+    // }
+    //
+    // if (user && (url.pathname === '/sign-in' || url.pathname === '/sign-up')) {
+    //     url.pathname = '/dashboard'
+    //     const redirectResponse = NextResponse.redirect(url)
+    //     cookiesToSetInRedirect(supabaseResponse, redirectResponse)
+    //     return redirectResponse
+    // }
 
     return supabaseResponse || url.pathname === "/"
 }

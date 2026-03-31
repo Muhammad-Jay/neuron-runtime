@@ -8,8 +8,15 @@ import {
     Database,
     Calendar,
     BarChart3,
-    Infinity
+    Infinity,
+    Workflow,
+    Cpu,
+    Layers,
+    Terminal,
+    GitBranch,
+    Share2, Zap, Brain, Shield, GitMerge, Activity
 } from "lucide-react";
+import {SectionType} from "@/components/layout/hero/HeroSection";
 
 export type AuthMethod = "oauth" | "apikey";
 
@@ -330,9 +337,6 @@ export const INTEGRATION_MANIFEST: Record<string, { label: string; actions: Inte
     },
 };
 
-
-import { Share2, Zap, Brain, Shield, Activity, GitMerge } from "lucide-react";
-
 export const NEURON_PILLARS = [
     {
         title: "Logical Mesh",
@@ -367,3 +371,96 @@ export const NEURON_PILLARS = [
         delay: 0.4
     }
 ];
+
+
+export type FloatingItem = {
+    title: string;
+    icon: any;
+    desc: string;
+    side: "left" | "right";
+};
+
+export const DATA: Record<SectionType, FloatingItem[]> = {
+    intro: [],
+    any: [],
+    features: [
+        {
+            title: "Execution Engine",
+            icon: Cpu,
+            side: "left",
+            desc: "High-performance runtime built for executing node-based workflows with deterministic state handling and asynchronous task coordination."
+        },
+        {
+            title: "Integration Layer",
+            icon: Workflow,
+            side: "right",
+            desc: "Abstracted interface for connecting external APIs, services, and webhooks into a unified execution pipeline."
+        },
+        {
+            title: "State Manager",
+            icon: Layers,
+            side: "left",
+            desc: "Maintains data consistency across nodes, ensuring reliable propagation of inputs, outputs, and intermediate transformations."
+        },
+        {
+            title: "Secure Connections",
+            icon: Terminal,
+            side: "right",
+            desc: "Handles credential isolation and authentication flows for third-party services with strict access boundaries."
+        }
+    ],
+
+    capabilities: [
+        {
+            title: "Real-Time Execution",
+            icon: Activity,
+            side: "left",
+            desc: "Event-driven processing engine capable of executing workflows instantly with full visibility into each step."
+        },
+        {
+            title: "Conditional Routing",
+            icon: GitBranch,
+            side: "right",
+            desc: "Dynamic branching logic that adapts execution paths based on runtime data and evaluation results."
+        },
+        {
+            title: "Context Propagation",
+            icon: Cpu,
+            side: "left",
+            desc: "Ensures every node operates with accurate upstream data through structured context resolution."
+        },
+        {
+            title: "Composable Pipelines",
+            icon: Workflow,
+            side: "right",
+            desc: "Build modular workflows by chaining nodes into reusable, scalable execution pipelines."
+        }
+    ],
+
+    demos: [
+        {
+            title: "Content Generation Flow",
+            icon: Layers,
+            side: "left",
+            desc: "Automates blog creation by combining LLM nodes, external data sources, and transformation steps into a single pipeline."
+        },
+        {
+            title: "API Orchestration",
+            icon: Terminal,
+            side: "right",
+            desc: "Coordinates multiple API calls, handles responses, and transforms data across services in real-time."
+        },
+        {
+            title: "Decision Automation",
+            icon: GitBranch,
+            side: "left",
+            desc: "Implements logic-driven workflows that evaluate conditions and route execution intelligently."
+        },
+        {
+            title: "Hybrid AI Workflows",
+            icon: Activity,
+            side: "right",
+            desc: "Combines deterministic logic with LLM-based reasoning for advanced automation scenarios."
+        }
+    ]
+};

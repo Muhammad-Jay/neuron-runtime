@@ -5,6 +5,8 @@ import { useState, useRef } from "react"
 import { AppButton } from "@/components/CustomButton"
 import { Cpu, BookOpen, Layers, Zap, LogIn } from "lucide-react"
 import Link from "next/link"
+import {useHeroBridge} from "@/hooks/use-hero-bridge";
+import {SectionType} from "@/components/layout/hero/HeroSection";
 
 const NAV_LINKS = [
     { name: "Features", href: "#features", icon: Zap },
@@ -12,8 +14,15 @@ const NAV_LINKS = [
     { name: "Capabilities", href: "#capabilities", icon: Layers },
 ]
 
+const sectionMapping: Record<string, SectionType> = {
+    "Features": "features",
+    "Capabilities": "capabilities",
+    "Docs": "intro"
+};
+
 export function Navbar() {
     const { scrollY } = useScroll()
+    const { scrollToSection } = useHeroBridge();
     const [hidden, setHidden] = useState(false)
     const prevScrollY = useRef(0)
 
@@ -59,14 +68,17 @@ export function Navbar() {
                     {/* CENTER: NAV LINKS */}
                     <div className="hidden md:flex items-center gap-1  p-1 rounded-xl">
                         {NAV_LINKS.map((link) => (
-                            <Link
+                            <button
                                 key={link.name}
-                                href={link.href}
+                                onClick={() => {
+                                    const target = sectionMapping[link.name];
+                                    if (target) scrollToSection(target);
+                                }}
                                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest text-neutral-400 hover:text-white hover:bg-white/5 transition-all"
                             >
                                 <link.icon size={12} className="opacity-50" />
                                 {link.name}
-                            </Link>
+                            </button>
                         ))}
                     </div>
                 </div>
@@ -77,10 +89,10 @@ export function Navbar() {
                         Sign In
                     </Link>
                     <AppButton
-                        label="Launch Terminal"
+                        label="Start Building"
                         variant="primary"
                         icon={<LogIn size={14} />}
-                        className="bg-white text-black px-6 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-neutral-200 transition-all active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                        className="bg-white text-black px-7 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-neutral-200 transition-all active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
                     />
                 </div>
             </div>

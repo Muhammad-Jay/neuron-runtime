@@ -4,7 +4,7 @@ import { useScroll, useTransform, useSpring, useMotionValueEvent } from "framer-
 import { useState, RefObject } from "react"
 import {SectionType} from "@/components/layout/hero/HeroSection";
 
-export function useHeroBridge(containerRef: RefObject<HTMLDivElement | null>) {
+export function useHeroBridge(containerRef?: RefObject<HTMLDivElement | null>) {
     const [activeSection, setActiveSection] = useState<SectionType>("intro")
 
     const { scrollYProgress } = useScroll({
@@ -45,9 +45,26 @@ export function useHeroBridge(containerRef: RefObject<HTMLDivElement | null>) {
         if (next !== activeSection) setActiveSection(next)
     })
 
+    const scrollToSection = (section: SectionType) => {
+        const SECTIONS: SectionType[] = ["intro", "features", "capabilities", "demos"];
+        const index = SECTIONS.indexOf(section);
+        if (index === -1) return;
+
+        // The total scrollable height of the entire document
+        const fullHeight = document.documentElement.scrollHeight - window.innerHeight;
+
+        const targetProgress = (index / (SECTIONS.length - 1)) * 0.7;
+
+        window.scrollTo({
+            top: fullHeight * targetProgress,
+            behavior: "smooth"
+        });
+    };
+
     return {
         activeSection,
         scrollYProgress,
+        scrollToSection,
         transforms: {
             sphere: { left: sphereLeft, width: sphereWidth, scale: sphereScale },
             text: { opacity: textOpacity, x: textX },
