@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { ChevronDown, Share2, AlertCircle, Link2 } from "lucide-react";
 import { useWorkflowEditor } from "@/hooks/workflow/useWorkflowEditor";
 import { WorkflowEditorActionType } from "@/constants";
-import { ContextNode } from "@neuron/shared";
+import {ContextNode, NodeConfigType} from "@neuron/shared";
 import { cn } from "@/lib/utils";
 
 export const ContextRegistrationSheet = ({ nodeId }: { nodeId: string }) => {
@@ -16,12 +16,12 @@ export const ContextRegistrationSheet = ({ nodeId }: { nodeId: string }) => {
 
     // Direct state lookup for reactivity
     const nodes = editorState.graph.nodes;
-    const currentNode = nodes.find((n) => n.id === nodeId);
-    const contextNode = nodes.find((n) => n.type === 'contextNode') as ContextNode;
+    const currentNode = nodes[nodeId];
+    const contextNode = Object.values(nodes).find((n) => n.type === 'contextNode') as ContextNode;
 
     if (!currentNode) return null;
 
-    const config: any = currentNode.config || {};
+    const config: NodeConfigType = currentNode.config;
     const isActive = config.persistToContext && !!contextNode;
 
     const handleToggle = (checked: boolean) => {
@@ -108,8 +108,8 @@ export const ContextRegistrationSheet = ({ nodeId }: { nodeId: string }) => {
                 )} />
             </CollapsibleTrigger>
 
-            <CollapsibleContent onClick={handleToggle} className="pt-6 space-y-5">
-                <div className="flex items-center justify-between bg-black/20 p-3 rounded-xl border border-neutral-800/50">
+            <CollapsibleContent className="pt-6 space-y-5">
+                <div onClick={() => handleToggle(!isActive)} className="flex items-center justify-between bg-black/20 p-3 rounded-xl border hover:bg-black/15 transition-200 border-neutral-800/50">
                     <div className="space-y-1">
                         <Label htmlFor="persist" className="text-white text-[10px] font-bold uppercase tracking-tight cursor-pointer">
                             Expose Output

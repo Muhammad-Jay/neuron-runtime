@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
-import {NodeExecutionStatus} from "../../../../../shared/src/types/node.types";
+import {NodeExecutionStatus} from "@neuron/shared";
 
 interface NodeStatusIndicatorProps {
     status?: NodeExecutionStatus;

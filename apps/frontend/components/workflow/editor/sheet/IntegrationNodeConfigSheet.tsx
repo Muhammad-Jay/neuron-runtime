@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 
 export function IntegrationNodeConfigSheet({ node, open, onOpen }: { node: Node; open: boolean; onOpen: (o: boolean) => void }) {
     const { workflowEditorDispatch, editorState: { graph: { nodes, edges }} } = useWorkflowEditor();
+
     const availableVariables = getAvailableUpstreamNodes(node.id, { nodes, edges });
 
     const [config, setConfig] = useState(node.data.config || {

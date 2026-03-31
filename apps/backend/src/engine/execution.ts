@@ -7,6 +7,8 @@ import {nodeRegistry} from "./node.registry";
 import {getGlobalVariables} from "../services/repository/global.variables.repository";
 import {resolveTemplate} from "./resolveTemplate";
 import {WorkflowNode, WorkflowEdge} from "../types/workflow/workflow.types";
+import {NodeConfigType} from "@neuron/shared";
+import {createContextEntry} from "../utils/telemetry";
 
 export type FinalResponseType = {
     status: number;
@@ -41,6 +43,7 @@ export async function executeWorkflow(
     const { nodes, edges } = graph;
     const { dispatch } = workflowBroadcast(runId);
 
+    const contextNode: Record<string, any> = {}; // for storing the output data of nodes
     const nodesContext: Record<string, any> = {};
     const globalVariables: Record<string, string> = {};
     const completed = new Set<string>();
@@ -64,6 +67,8 @@ export async function executeWorkflow(
     for (const node of nodes) {
         incoming[node.id] = [];
         outgoing[node.id] = [];
+
+        if (node.type.includes("contextNode")) contextNode.isPresent = true;
     }
 
     edges.forEach(e => {
@@ -92,7 +97,9 @@ export async function executeWorkflow(
         try {
             // 3. Resolve Configuration with full Context
             // This injects {{nodeId...}} and {{Global.KEY}} values
-            const resolvedConfig = await resolveConfig(node.config, nodesContext, globalVariables);
+            const startTime = performance.now();
+
+            const resolvedConfig = await resolveConfig(node.config, nodesContext, globalVariables) as any;
 
             const executor = nodeRegistry[node.type];
             if (!executor) throw new Error(`No executor found for type: ${node.type}`);
@@ -100,6 +107,7 @@ export async function executeWorkflow(
             await new Promise(r => setTimeout(r, 400));
 
             console.log(`from ${node.type}: `, resolvedConfig)
+
             const output = await executor({
                 node: { ...node, config: resolvedConfig },
                 // Pass the first available parent output as a direct input for simple nodes
@@ -112,8 +120,18 @@ export async function executeWorkflow(
                 finalResponse = {
                     status: output.status,
                     headers: output.headers,
-                    body: output.body
+                    body: resolvedConfig.attachContext ? {
+                        ...output.body,
+                        context: contextNode
+                    } : output.body,
                 };
+            }
+
+            // Check if node allow persistToContext in config
+            if (resolvedConfig.persistToContext && contextNode.isPresent) {
+                console.log("[Neuron]: Persisting to context node...");
+
+                contextNode[nodeId] = createContextEntry(node, output, startTime);
             }
 
             // 4. Update Context & Mark Progress
@@ -185,6 +203,7 @@ export async function executeWorkflow(
     const startNodes = nodes.filter(n => incoming[n.id]!.length === 0).map(n => n.id);
     await Promise.all(startNodes.map(runNode));
 
+    console.log("[Neuron]: Final data from context node:", contextNode);
     return {
         nodesContext,
         globalVariables,

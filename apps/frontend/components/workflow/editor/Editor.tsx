@@ -27,14 +27,11 @@ import DynamicNode from "@/components/workflow/editor/nodes/DynamicNode";
 import {HttpRequestNodeConfigSheet} from "@/components/workflow/editor/sheet/HttpNodeConfigSheet";
 import {DebugNodeConfigSheet} from "@/components/workflow/editor/sheet/DebugNodeSheet";
 import {TriggerNodeConfigSheet} from "@/components/workflow/editor/sheet/TriggerNodeSheet";
-import {Skeleton} from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge"
 import { Spinner } from "@/components/ui/spinner"
 import {PanelWrapper} from "@/components/workflow/editor/Panel/PanelWrapper";
 import {Button} from "@/components/ui/button";
-import {LoaderCircle, Play, Rocket, Variable} from "lucide-react";
-import {SheetWrapper} from "@/components/workflow/editor/SheetWrapper";
-import {JsonRenderer} from "@/components/JsonRenederer";
+import {Play, Rocket, Variable} from "lucide-react";
 import {ConditionNodeConfigSheet} from "@/components/workflow/editor/sheet/ConditionNodeConfigSheet";
 import {TransformNodeConfigSheet} from "@/components/workflow/editor/sheet/TransformNodeConfigSheet";
 import {NodesInspector} from "@/components/workflow/editor/sheet/NodesInspector";
@@ -45,7 +42,6 @@ import {IntegrationNodeConfigSheet} from "@/components/workflow/editor/sheet/Int
 import {GlobalVariablesSheet} from "@/components/workflow/editor/sheet/GlobalVariableSheet";
 import {EditorLoader} from "@/components/workflow/editor/EditorLoader";
 import {OutputNodeConfigSheet} from "@/components/workflow/editor/sheet/OutputNodeConfigSheet";
-import {Separator} from "@/components/ui/separator";
 import {DeployWorkflowPanel} from "@/components/workflow/editor/dialog/DeployWorkflowDialog";
 import {RespondNodeConfigSheet} from "@/components/workflow/editor/sheet/RespondNodeConfigSheet";
 import {ContextNodeConfigSheet} from "@/components/workflow/editor/sheet/ContextNodeConfigSheet";
@@ -77,6 +73,8 @@ export function Editor() {
     const {
         editorState,
         workflowEditorDispatch,
+        rfNodes,
+        rfEdges,
         setSelectedNode,
         handleSelectTemplate,
         selectedNode,
@@ -101,48 +99,6 @@ export function Editor() {
     const [graphNodes, setGraphNodes, onNodesChange] = useNodesState([]);
     const [graphEdges, setGraphEdges, onEdgesChange] = useEdgesState([]);
 
-    // --------------------------------------------
-    // 1️⃣ Sync reducer → ReactFlow (ON LOAD / STATE CHANGE)
-    // --------------------------------------------
-
-    useEffect(() => {
-
-        const isActive = (id: string) => editorState?.runtime?.activeEdges?.[id];
-
-        const rfNodes: Node[] = editorState.graph.nodes.map((node) => ({
-            id: node.id,
-            type: node.type,
-            position: node.position,
-            data: {
-                config: node.config,
-            },
-            selected: selectedNode ? selectedNode?.id === node.id : false,
-        }));
-
-        const rfEdges: Edge[] = editorState.graph.edges.map((edge) => {
-            const active = isActive(edge.id);
-
-            return {
-                id: edge.id,
-                source: edge.source,
-                target: edge.target,
-                type: "default",
-                animated: active,
-                style: {
-                    stroke: active ? "#00cf00" : "#4b5563",
-                    strokeWidth: active ? 4 : 2,
-                    transition: 'stroke 0.3s, stroke-width 0.3s',
-                },
-                sourceHandle: edge.sourceHandle,
-                targetHandle: edge.targetHandle,
-            };
-        });
-
-        setGraphNodes(rfNodes);
-        setGraphEdges(rfEdges);
-
-    }, [editorState.graph, editorState.runtime, setGraphNodes, setGraphEdges]);
-
     useOnSelectionChange({
         onChange: ({nodes: selectedNodes}) => {
             if (!selectedNodes || selectedNodes.length === 0) {
@@ -153,6 +109,17 @@ export function Editor() {
         }
     });
 
+
+    useEffect(() => {
+        if (!rfNodes) return;
+
+        const timer = setTimeout(() => {
+            setGraphNodes(rfNodes);
+            setGraphEdges(rfEdges);
+        }, 200)
+
+        return () => clearTimeout(timer)
+    }, [rfNodes, rfEdges, setGraphNodes, setGraphEdges]);
 
 
     // --------------------------------------------

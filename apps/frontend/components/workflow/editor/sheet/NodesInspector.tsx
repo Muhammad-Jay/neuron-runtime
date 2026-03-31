@@ -19,7 +19,6 @@ export function NodesInspector() {
     const {
         editorState,
         setSheetOpen,
-        setSelectedNode,
         isEditorPanelOpen,
         setIsEditorPanelOpen,
         fitNode
@@ -44,14 +43,14 @@ export function NodesInspector() {
             width="w-[300px]"
         >
             <div className="flex flex-col gap-2">
-                {nodes.length === 0 ? (
+                {Object.entries(nodes).length < 1 ? (
                     <div className="py-10 flex flex-col items-center justify-center border border-dashed border-neutral-800 rounded-lg">
                         <p className="text-[10px] text-neutral-600 uppercase font-bold tracking-widest">
                             No nodes found
                         </p>
                     </div>
                 ) : (
-                    nodes.map((node) => {
+                    Object.entries(nodes).map(([id, node]) => {
                         const color = getNodeColor(node.type)
                         const status = editorState.runtime?.nodeStatus?.[node.id] ?? "idle"
 

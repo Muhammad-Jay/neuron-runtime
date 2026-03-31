@@ -251,6 +251,8 @@ export interface RespondNodeConfig extends ContextRegistrationSettings {
 
     sourceNodeId?: string;
 
+    attachContext: boolean;
+
     // Metadata for the Jaguar UI and type-safety
     outputSchema?: SchemaField;
 }

@@ -96,7 +96,7 @@ export function TransformNodeConfigSheet({
                             <Terminal className="w-3 h-3 text-neutral-500" />
                             <span className="text-[10px] font-mono text-neutral-400">runtime: node-js-20</span>
                         </div>
-                        <Badge variant="outline" className="text-[9px] bg-purple-500/5 text-purple-400 border-purple-500/20 uppercase tracking-tighter">
+                        <Badge variant="outline" className="text-[9px] bg-purple-500/5 text-primary border-primary uppercase tracking-tighter">
                             Javascript V8
                         </Badge>
                     </div>
@@ -136,7 +136,7 @@ export function TransformNodeConfigSheet({
                                 {/* Global Variable Info */}
                                 <div className="space-y-1.5">
                                     <div className="flex items-center gap-2">
-                                        <code className="text-purple-400 text-[11px] font-bold bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/20">
+                                        <code className="text-primary text-[11px] font-bold bg-purple-500/10 px-1.5 py-0.5 rounded border border-primary">
                                             inputs
                                         </code>
                                         <span className="text-[10px] text-neutral-400 font-medium">Global Object</span>

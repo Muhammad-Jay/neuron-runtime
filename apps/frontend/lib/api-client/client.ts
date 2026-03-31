@@ -1,7 +1,7 @@
 "use server";
 
 import {authorizedFetch} from "@/lib/api-client/authorizeFetch";
-import type {WorkflowDefinition, GlobalVariable} from "@neuron/shared";
+import type {WorkflowDefinition, GlobalVariable, WorkflowNode, WorkflowEdge} from "@neuron/shared";
 
 const URL = process.env.NEXT_PUBLIC_API_ENDPOINT! as string;
 
@@ -70,7 +70,7 @@ export async function getWorkflowGraphRequest(workflowId: string, token: any) {
     return await authorizedFetch(url, options, token);
 }
 
-export async function saveWorkflowGraphRequest(workflowId: string, token: any, payload: { graph: WorkflowDefinition, globalVariables: GlobalVariable[]}) {
+export async function saveWorkflowGraphRequest(workflowId: string, token: any, payload: { graph: { nodes: WorkflowNode[], edges: WorkflowEdge[]}, globalVariables: GlobalVariable[]}) {
 
     const url = `${URL}/workflows/${workflowId}/graph`;
     const options = {
@@ -112,7 +112,7 @@ export async function deleteSecretRequest(id: string, token: any){
 }
 
 // Run workflow
-export async function runWorkflowRequest(runId: string, graph: WorkflowDefinition, token: any){
+export async function runWorkflowRequest(runId: string, token: any){
     const url = `${URL}/workflows/execute/${runId}`;
 
     const options = {

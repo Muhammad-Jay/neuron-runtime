@@ -268,22 +268,30 @@ export function decrypt(payload: VaultPayload) {
 }
 
 
-export function getAvailableUpstreamNodes(targetNodeId: string, graph: WorkflowDefinition) {
+export function getAvailableUpstreamNodes(
+    targetNodeId: string,
+    graph: { nodes: Record<string, WorkflowNode>; edges: Record<string, WorkflowEdge> }
+): WorkflowNode[] {
     const { nodes, edges } = graph;
+
+    // 1. Group edges by target for fast "Parent" lookup
+    // Since edges are now a Record, we iterate Object.values
     const incomingMap: Record<string, string[]> = {};
 
-    // 1. Build the mapping of who points to whom
-    edges.forEach(edge => {
-        if (!incomingMap[edge.target]) incomingMap[edge.target] = [];
+    Object.values(edges).forEach(edge => {
+        if (!incomingMap[edge.target]) {
+            incomingMap[edge.target] = [];
+        }
         incomingMap[edge.target].push(edge.source);
     });
 
     const ancestors = new Set<string>();
     const queue = [...(incomingMap[targetNodeId] || [])];
 
-    // 2. Walk backwards through the graph
+    // 2. Breadth-First Search (BFS) backwards
     while (queue.length > 0) {
         const currentId = queue.shift()!;
+
         if (!ancestors.has(currentId)) {
             ancestors.add(currentId);
             const parents = incomingMap[currentId] || [];
@@ -291,8 +299,10 @@ export function getAvailableUpstreamNodes(targetNodeId: string, graph: WorkflowD
         }
     }
 
-    // 3. Return the actual node objects (for the label/name in the dropdown)
-    return nodes.filter(node => ancestors.has(node.id));
+    // 3. Map the IDs back to actual Node objects using O(1) Record access
+    return Array.from(ancestors)
+        .map(id => nodes[id])
+        .filter(Boolean); // Ensure we don't return undefined if a node was deleted
 }
 
 

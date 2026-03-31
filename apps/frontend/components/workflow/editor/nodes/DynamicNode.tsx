@@ -34,7 +34,6 @@ export default function DynamicNode(node: NodeProps) {
         workflowEditorDispatch,
         setSheetOpen,
         setSelectedNode,
-        isRunning,
     } = useWorkflowEditor();
 
     const color = getNodeColor(type);
@@ -74,7 +73,7 @@ export default function DynamicNode(node: NodeProps) {
                     className={cn(
                         "group flex flex-col gap-1.5 w-[200px] h-fit transition-all p-3 bg-neutral-800/25 backdrop-blur-sm border-0 rounded-xl relative",
                         statusClass,
-                        selected && "ring-2! ring-primary! shadow-primary",
+                        selected && "ring-2! ring-primary!",
                         node.type === "contextNode" && "w-[250px]"
                     )}
                 >
@@ -83,7 +82,7 @@ export default function DynamicNode(node: NodeProps) {
                     <DynamicNodeToolbar
                         nodeId={node.id}
                         nodeType={node.type}
-                        config={node.data.config}
+                        config={node.data}
                         isVisible={selected}
                         onSettingsClick={() => {
                             setSelectedNode(nodePropsToReactflowNode(node));
@@ -112,7 +111,9 @@ export default function DynamicNode(node: NodeProps) {
                         position={Position.Right}
                     />
 
-                    <DecisionNodeHandlesRenderer node={node} />
+                    {node?.type === "decisionNode" && (
+                        <DecisionNodeHandlesRenderer node={node} />
+                    )}
 
                     {node?.type === "condition" && (
                         <>

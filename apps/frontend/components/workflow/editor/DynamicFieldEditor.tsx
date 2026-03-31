@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNodeOutputs } from "@/hooks/useNodeOutputs";
-import {FieldInput} from "../../../../shared/src/types/node.types";
+import type {FieldInput} from "@neuron/shared";
 import {convertFieldInputToSchema} from "@/lib/utils";
 
 interface DynamicFieldEditorProps {

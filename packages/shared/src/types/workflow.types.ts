@@ -37,8 +37,8 @@ export type WorkflowTableSchemaType = {
 
 
 export interface WorkflowDefinition {
-    nodes: WorkflowNode[]
-    edges: WorkflowEdge[]
+    nodes: Record<string, WorkflowNode>
+    edges: Record<string, WorkflowEdge>
 }
 
 

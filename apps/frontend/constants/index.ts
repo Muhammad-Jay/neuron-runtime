@@ -255,6 +255,7 @@ export const NODE_TEMPLATES: NodeTemplate[] = [
                 data: ""
             },
             sourceNodeId: "",
+            attachContext: false,
             options: {
                 minify: false,
                 includeTraceId: true,

@@ -30,7 +30,9 @@ export function GlobalVariablesSheet() {
     const { editorState, workflowEditorDispatch, isGlobalVariableSheetOpen, setIsGlobalVariableSheetOpen } = useWorkflowEditor();
 
     // variables is now Record<string, GlobalVariable>
-    const variables = editorState.globalVariables ?? {};
+    const variables = useMemo(() => {
+        return editorState.globalVariables ?? {}
+    }, [editorState.globalVariables]);
 
     const [draft, setDraft] = useState({ key: "", value: "" });
     const [editingKey, setEditingKey] = useState<string | null>(null);

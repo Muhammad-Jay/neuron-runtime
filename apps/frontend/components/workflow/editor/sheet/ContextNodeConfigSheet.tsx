@@ -34,10 +34,11 @@ export function ContextNodeConfigSheet({
 }) {
     const { workflowEditorDispatch, editorState } = useWorkflowEditor();
 
-    // FIX: Pull the node directly from global state to ensure UI reactivity
-    const activeNode = useMemo(() =>
-            editorState.graph.nodes.find(n => n.id === initialNode.id) as ContextNode,
-        [editorState.graph.nodes, initialNode]);
+    const activeNode = useMemo(() => {
+        const node = editorState.graph.nodes[initialNode.id];
+
+        return node as ContextNode;
+    }, [editorState.graph.nodes, initialNode.id]);
 
     const fields = activeNode.config?.fields ?? {};
     const fieldEntries = Object.entries(fields);
@@ -115,7 +116,7 @@ export function ContextNodeConfigSheet({
                                 </Badge>
                             </div>
 
-                            <div className="space-y-2">
+                            <div className="space-y-2 min-h-full!">
                                 {fieldEntries.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center py-20 border border-neutral-900 rounded-3xl bg-neutral-900/20">
                                         <Braces className="w-5 h-5 text-neutral-800 mb-3" />
@@ -159,7 +160,7 @@ export function ContextNodeConfigSheet({
                         </div>
 
                         {/* ARCHITECTURAL INFO BOX */}
-                        <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-6 flex gap-5">
+                        <div className="bg-green-500/[0.10] border border-white/5 rounded-3xl p-6 flex gap-5">
                             <div className="p-2.5 bg-white/5 rounded-2xl h-fit border border-white/10">
                                 <ShieldCheck className="w-4 h-4 text-white" />
                             </div>
@@ -177,7 +178,7 @@ export function ContextNodeConfigSheet({
                 </ScrollArea>
 
                 {/* BOTTOM ACTION BAR */}
-                <div className="p-6 bg-neutral-950/50 border-t border-neutral-900 flex items-center justify-between">
+                <div className="p-6 pb-3! bg-neutral-950/50 border-t border-neutral-900 flex items-center justify-between">
                     <button
                         onClick={() => onOpen(false)}
                         className="text-[9px] text-neutral-600 hover:text-white font-bold uppercase tracking-widest transition-colors px-2 flex items-center gap-2"

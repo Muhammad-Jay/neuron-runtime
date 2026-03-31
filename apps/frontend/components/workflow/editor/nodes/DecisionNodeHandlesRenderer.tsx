@@ -1,28 +1,30 @@
 "use client";
 
 import React from "react";
-import { Position, NodeProps } from "reactflow";
+import {NodeProps, Position} from "reactflow";
 import { NodeHandle } from "./NodeHandle";
-import {cn} from "@/lib/utils"; // Adjust path as needed
+import { cn } from "@/lib/utils";
 
 interface DecisionNodeHandlesRendererProps {
-    node: NodeProps;
+    node: NodeProps
 }
 
 export function DecisionNodeHandlesRenderer({ node }: DecisionNodeHandlesRendererProps) {
-    const { rules, includeDefault } = node.data.config;
+    // Defensive check: Ensure config exists before destructuring
+    if (!node) return null;
+
+    console.log("Node from decision NOde: ", node);
+    const { data: { rules, includeDefault } } = node;
 
     // We only render source handles if there are rules
-    if (!rules || rules.length === 0) return null;
+    if (!rules || !Array.isArray(rules) || rules.length === 0) return null;
 
     return (
         <div className="absolute right-0 top-0 bottom-0 flex flex-col justify-around py-4 pointer-events-none">
-            {rules.map((rule, index) => {
-                // Calculate percentage-based positioning if you prefer manual style,
-                // but flex flex-col justify-around usually handles the vertical distribution perfectly.
+            {rules.map((rule: any, index: number) => {
                 return (
                     <div
-                        key={rule.id}
+                        key={rule.id || index}
                         className="relative flex items-center justify-end group pointer-events-auto"
                         style={{ height: `${100 / rules.length}%` }}
                     >
@@ -30,10 +32,9 @@ export function DecisionNodeHandlesRenderer({ node }: DecisionNodeHandlesRendere
                             node={node}
                             type="source"
                             position={Position.Right}
-                            id={rule.id} // Critical: use the rule ID so edges link to the specific branch
+                            id={rule.id}
                             className={cn(
-                                "-right-[35px]!  bg-neutral-900 hover:bg-blue-500 hover:border-blue-400 transition-all shadow-sm",
-                                // Optional: color code based on rule status later
+                                "-right-[35px]! bg-neutral-900 hover:bg-blue-500 hover:border-blue-400 transition-all shadow-sm",
                             )}
                         />
 
@@ -56,7 +57,7 @@ export function DecisionNodeHandlesRenderer({ node }: DecisionNodeHandlesRendere
                         type="source"
                         position={Position.Right}
                         id="default-else"
-                        className="-right-[35px]!  border-amber-900/30! bg-neutral-900 hover:bg-amber-600 transition-all"
+                        className="-right-[35px]! border-amber-900/30! bg-neutral-900 hover:bg-amber-600 transition-all"
                     />
                 </div>
             )}
