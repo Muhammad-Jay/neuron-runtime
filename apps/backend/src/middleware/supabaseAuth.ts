@@ -8,7 +8,14 @@ export const supabase = createClient(
 
 export async function authenticate(req: any, res: any, next: any) {
     try {
-        req.user = await getUserFromRequest(req);
+        const user = await getUserFromRequest(req);
+
+        if (!user) {
+            throw new Error("Unauthorized request.");
+        }
+
+        req.user = user;
+
         return next();
     }catch (e) {
         return res.status(401).json({error: "Unauthorized request"});

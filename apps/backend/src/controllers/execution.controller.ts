@@ -12,11 +12,11 @@ import {
     getRecentExecutions,
 } from "../services/repository/execution.repository";
 
-type AuthRequest = Request & {
+export type AuthRequest = Request & {
     user: { id: string };
     params: {
-        executionId: string;
-        workflowId: string;
+        executionId?: string;
+        workflowId?: string;
     }
 };
 

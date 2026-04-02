@@ -136,12 +136,14 @@ export type TransformNode = BaseNode<TransformNodeConfig> & {
 
 export interface LLMNodeConfig extends ContextRegistrationSettings {
     provider: string;
-    model: string;            // e.g., "gpt-4o", "claude-3-5-sonnet"
-    systemPrompt: string;     // The "persona" (can contain {{vars}})
-    userPrompt: string;       // The actual instruction (can contain {{vars}})
-    temperature: number;      // 0.0 to 1.0
+    model: string;
+    systemPrompt: string;
+    userPrompt: string;
+    temperature: number;
     maxTokens: number;
-    apiKey: string;           // Usually a reference like {{Vault.OPENAI_KEY}}
+    apiKey: string;
+    jsonMode: boolean;
+    outputSchema: string;
 }
 
 

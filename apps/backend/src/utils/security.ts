@@ -1,5 +1,6 @@
 import dns from "dns/promises";
 import { isIP } from "net";
+import jwt from "jsonwebtoken";
 
 // Robust CIDR or prefix check for private ranges
 const PRIVATE_RANGES = [
@@ -34,4 +35,14 @@ export async function validateUrl(url: string) {
 
 function isPrivateIP(ip: string) {
     return PRIVATE_RANGES.some(range => range.test(ip));
+}
+
+
+function getUserIdFromToken(token: string) {
+    try {
+        const decoded: any = jwt.verify(token, process.env.SUPABASE_JWT_SECRET!);
+        return decoded.sub; // Supabase user id
+    } catch {
+        return null;
+    }
 }

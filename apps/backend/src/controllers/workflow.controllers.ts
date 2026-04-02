@@ -12,11 +12,20 @@ import {executeWorkflow} from "../engine/execution";
 import {getGlobalVariables, saveGlobalVariables} from "../services/repository/global.variables.repository";
 import {WorkflowNode, WorkflowEdge} from "../types/workflow/workflow.types";
 import {createExecution, updateExecutionStatus} from "../services/repository/execution.repository";
+import {AuthRequest} from "./execution.controller";
 
 // POST /api/workflows
-export const createWorkflowController = async (req: Request, res: Response) => {
+export const createWorkflowController = async (req: AuthRequest, res: Response) => {
     try {
         console.log("Creating workflow...");
+        const user = req.user;
+
+        if (!user) {
+            return res.status(401).json({
+                error: "Unauthorized",
+            });
+        }
+
         const workflow = await createWorkflow(req.body);
         res.status(201).json(workflow);
     } catch (error) {
@@ -25,23 +34,13 @@ export const createWorkflowController = async (req: Request, res: Response) => {
 };
 
 // GET /api/workflows
-export const getWorkflowController = async (req: Request, res: Response) => {
+export const getWorkflowController = async (req: AuthRequest, res: Response) => {
     try {
-        const authHeader = req.headers.authorization;
+        const user = req.user;
 
-        // 1. Check for token
-        if (!authHeader?.startsWith("Bearer ")) {
-            return res.status(401).json({ message: "No token provided" });
-        }
-
-        const token = authHeader?.replace("Bearer ", "");
-        const { data: { user }, error } = await supabase.auth.getUser(token);
-
-        // 2. Check for Auth Error
-        if (error || !user) {
+        if (!user) {
             return res.status(401).json({
-                message: "Unauthorized",
-                details: error?.message
+                error: "Unauthorized",
             });
         }
 
@@ -71,35 +70,18 @@ export const getWorkflowController = async (req: Request, res: Response) => {
 
 
 export async function fetchWorkflowGraphController(
-    req: Request,
+    req: AuthRequest,
     res: Response
 ) {
     console.log("fetching workflow graph...");
     try {
-        // Get Authorization header
-        const authHeader = req.headers.authorization;
+        const userId = req.user?.id;
 
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res.status(401).json({
-                error: "Missing or invalid authorization token",
-            });
-        }
-
-        const token = authHeader.replace("Bearer ", "");
-
-        // Get user from Supabase
-        const {
-            data: { user },
-            error: authError,
-        } = await supabase.auth.getUser(token);
-
-        if (authError || !user) {
+        if (!userId) {
             return res.status(401).json({
                 error: "Unauthorized",
             });
         }
-
-        const userId = user.id;
 
         // Get workflowId from params
         const { workflowId } = req.params as any;
@@ -136,35 +118,18 @@ export async function fetchWorkflowGraphController(
 
 
 export async function saveWorkflowGraphController(
-    req: Request,
+    req: AuthRequest,
     res: Response
 ) {
     try {
         console.log("Saving Graph...")
-        //  Authorization header
-        const authHeader = req.headers.authorization;
+        const userId = req.user?.id;
 
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res.status(401).json({
-                error: "Missing or invalid authorization token",
-            });
-        }
-
-        const token = authHeader.replace("Bearer ", "");
-
-        // 2️⃣ Validate user
-        const {
-            data: { user },
-            error: authError,
-        } = await supabase.auth.getUser(token);
-
-        if (authError || !user) {
+        if (!userId) {
             return res.status(401).json({
                 error: "Unauthorized",
             });
         }
-
-        const userId = user.id;
 
         // 3️⃣ Get workflowId
         const { workflowId } = req.params as any;
@@ -175,8 +140,10 @@ export async function saveWorkflowGraphController(
             });
         }
 
-        // 4️⃣ Validate body
-        const { graph: { nodes, edges }, globalVariables } = req.body;
+        const graph = req.body?.graph;
+        const nodes = graph?.nodes || [];
+        const edges = graph?.edges || [];
+        const globalVariables = req.body?.globalVariables || [];
 
         if (!Array.isArray(nodes) || !Array.isArray(edges) || !Array.isArray(globalVariables)) {
             return res.status(400).json({
@@ -217,33 +184,17 @@ export async function saveWorkflowGraphController(
 
 
 export async function addNodeController(
-    req: Request,
+    req: AuthRequest,
     res: Response
 ) {
     try {
-        const authHeader = req.headers.authorization;
+        const userId = req.user?.id;
 
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res.status(401).json({
-                error: "Missing or invalid authorization token",
-            });
-        }
-
-        const token = authHeader.replace("Bearer ", "");
-
-        // 2️⃣ Validate user
-        const {
-            data: { user },
-            error: authError,
-        } = await supabase.auth.getUser(token);
-
-        if (authError || !user) {
+        if (!userId) {
             return res.status(401).json({
                 error: "Unauthorized",
             });
         }
-
-        const userId = user.id;
 
         const { workflowId } = req.params as any;
 
@@ -290,30 +241,14 @@ export async function addNodeController(
 }
 
 // POST /api/workflows/:id/execute
-export const executeWorkflowController = async (req: Request, res: Response) => {
-    const authHeader = req.headers.authorization;
+export const executeWorkflowController = async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({
-            error: "Missing or invalid authorization token",
-        });
-    }
-
-    const token = authHeader.replace("Bearer ", "");
-
-    // 2️⃣ Validate user
-    const {
-        data: { user },
-        error: authError,
-    } = await supabase.auth.getUser(token);
-
-    if (authError || !user) {
+    if (!userId) {
         return res.status(401).json({
             error: "Unauthorized",
         });
     }
-
-    const userId = user.id;
 
     const { workflowId } = req.params as any;
 

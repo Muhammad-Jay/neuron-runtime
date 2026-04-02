@@ -125,6 +125,9 @@ export function WorkflowEditorProvider({ children }: { children: React.ReactNode
     const [selectedNode, setSelectedNode] = useState<Node | null | undefined>();
     const [selectedHandle, setSelectedHandle] = useState<string | null>(null);
 
+    const isSaving = useRef(false);
+    const pendingSave = useRef(false);
+
     // --- REFACTORED REDUCER FOR RECORD LOOKUP ---
     function workflowEditorReducer(
         state: IWorkflowEditorState,
@@ -355,11 +358,19 @@ export function WorkflowEditorProvider({ children }: { children: React.ReactNode
     };
 
     const saveWorkflowGraph = async () => {
+        // Prevent parallel execution
+        if (isSaving.current) {
+            pendingSave.current = true;
+            return;
+        }
+
+        isSaving.current = true;
+
         try {
             setIsWorkflowSaving(true);
+
             const token = await getSession();
 
-            // Convert Records back to Arrays for the API payload
             const payload = {
                 graph: {
                     nodes: Object.values(editorState.graph.nodes),
@@ -369,11 +380,25 @@ export function WorkflowEditorProvider({ children }: { children: React.ReactNode
             };
 
             await saveWorkflowGraphRequest(workflowId, token, payload);
-            workflowEditorDispatch({ type: WorkflowEditorActionType.UPDATE_DIRTY_STATE, state: false });
-        } catch (e) {
-            console.error(e.message);
+
+            workflowEditorDispatch({
+                type: WorkflowEditorActionType.UPDATE_DIRTY_STATE,
+                state: false,
+            });
+
+        } catch (e: any) {
+            console.error("Save failed:", e.message);
         } finally {
             setIsWorkflowSaving(false);
+            isSaving.current = false;
+
+            if (pendingSave.current) {
+                pendingSave.current = false;
+
+                setTimeout(() => {
+                    saveWorkflowGraph();
+                }, 300);
+            }
         }
     };
 
@@ -467,13 +492,17 @@ export function WorkflowEditorProvider({ children }: { children: React.ReactNode
 
     useEffect(() => {
         if (!editorState.isDirty) return;
+
         if (saveTimeout.current) clearTimeout(saveTimeout.current);
+
         saveTimeout.current = setTimeout(() => {
             saveWorkflowGraph();
-        }, 2000);
+        }, 1500);
 
-        return () => { if (saveTimeout.current) clearTimeout(saveTimeout.current); };
-    }, [editorState.isDirty]);
+        return () => {
+            if (saveTimeout.current) clearTimeout(saveTimeout.current);
+        };
+    }, [editorState.graph, editorState.globalVariables]);
 
     useEffect(() => {
         if (workflowId) loadWorkflow();

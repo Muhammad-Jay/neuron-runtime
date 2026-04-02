@@ -7,7 +7,7 @@ import {
     WorkflowEdge,
     WorkflowVersion
 } from "../../types/workflow/workflow.types";
-import {and, desc, eq} from "drizzle-orm";
+import {and, desc, eq, sql} from "drizzle-orm";
 import {workflowEdges, workflowNodes, workflows, workflowVersions} from "../../schemas";
 import {convertNodeToDBSchema} from "../../utils/node";
 import {convertEdgeToDBSchema} from "../../utils/edge";
@@ -158,6 +158,24 @@ export async function saveWorkflowGraph({
                    })
                 })
             );
+
+            await tx.insert(workflowNodes)
+                .values(
+                    nodesData.map((node) => {
+                        const formatedNode = convertNodeToDBSchema(node);
+
+                        return ({
+                            ...formatedNode,
+                            workflowId,
+                        })
+                    })
+                )
+                .onConflictDoUpdate({
+                    target: workflowNodes.id,
+                    set: {
+                        config: sql`excluded.config`,
+                    }
+                });
         }
 
         // 4️⃣ Insert edges

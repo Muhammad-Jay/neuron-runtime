@@ -37,6 +37,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTrigger, DialogTitle } from 
 import {Button} from "@/components/ui/button";
 import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
 import {PromptOrchestrator} from "@/components/workflow/editor/sheet/PromptOrchestrator";
+import {LLMNodeConfig} from "@neuron/shared";
+import {SchemaDialog} from "@/components/workflow/editor/dialog/SchemaDialog";
 
 const LLM_PROVIDERS = [
     { label: "OpenAI", value: "openai", icon: "🟢" },
@@ -66,12 +68,13 @@ export function LLMNodeConfigSheet({ node, open, onOpen }: { node: Node, open: b
     const { workflowEditorDispatch, editorState: { graph: { nodes, edges }} } = useWorkflowEditor();
 
     const [provider, setProvider] = useState<string>(node.data?.provider ?? "openai");
-    const [config, setConfig] = useState({
+    const [config, setConfig] = useState<LLMNodeConfig>({
         provider: node.data?.provider ?? "openai",
         model: "gpt-4o",
         systemPrompt: "",
         userPrompt: "",
         temperature: 0.7,
+        outputSchema: node.data?.outputSchema ?? "",
         maxTokens: 2048,
         jsonMode: false,
         apiKey: "{{Vault.OPENAI_API_KEY}}",
@@ -177,7 +180,7 @@ export function LLMNodeConfigSheet({ node, open, onOpen }: { node: Node, open: b
                                     <Input
                                         value={config.apiKey}
                                         onChange={(e) => handleChange("apiKey", e.target.value)}
-                                        className="bg-black/60 border-neutral-800 text-xs h-9 focus:border-blue-500/50"
+                                        className="bg-black/60 border-neutral-800 text-xs h-9 focus:border-neutral-500/50"
                                         placeholder="{{Vault.OPENAI_API_KEY}}"
                                     />
                                 </div>
@@ -240,6 +243,11 @@ export function LLMNodeConfigSheet({ node, open, onOpen }: { node: Node, open: b
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Conditional Schema Builder */}
+                                {config.jsonMode && (
+                                    <SchemaDialog value={config.outputSchema ?? ""} onChange={handleChange}/>
+                                )}
                             </div>
                         </div>
 

@@ -19,25 +19,22 @@ interface JaguarEditorProps {
 }
 
 const CodeEditor = ({
-                          value,
-                          onChange,
-                          language = 'javascript',
-                          className,
-                          height = "300px"
-                      }: JaguarEditorProps) => {
+                        value,
+                        onChange,
+                        language = 'javascript',
+                        className,
+                        height = "300px"
+                    }: JaguarEditorProps) => {
     const editorRef = useRef<HTMLDivElement>(null);
     const viewRef = useRef<EditorView | null>(null);
 
-    // Your specific "Amethyst" theme tokens
-    const amethystHighlightStyle = HighlightStyle.define([
-        // { tag: t.comment, color: '#7c7c7c' },
-        // { tag: t.keyword, color: '#984eff' },
-        // { tag: t.string, color: '#87ffa9' },
-        // { tag: t.variableName, color: '#acacac' },
-        // { tag: t.propertyName, color: '#88a1fd' },
-        // { tag: t.typeName, color: '#be6bef' },
-        // { tag: t.number, color: '#f48067' },
+    // Helper to ensure we always have a string for CodeMirror
+    const getSafeValue = (val: any): string => {
+        if (typeof val === 'string') return val;
+        return ""; // Fallback for null, undefined, or {}
+    };
 
+    const amethystHighlightStyle = HighlightStyle.define([
         { tag: t.comment, color: '#7c7c7c' },
         { tag: t.keyword, color: '#984eff' },
         { tag: t.string, color: '#87ffa9' },
@@ -45,24 +42,27 @@ const CodeEditor = ({
         { tag: t.propertyName, color: '#88a1fd' },
         { tag: t.typeName, color: '#be6bef' },
         { tag: t.number, color: '#f48067' },
-
     ]);
 
     useEffect(() => {
         if (!editorRef.current) return;
 
+        // CRITICAL FIX: Ensure CodeMirror receives a string on initialization
+        const safeDoc = getSafeValue(value);
+
         const state = EditorState.create({
-            doc: value,
+            doc: safeDoc,
             extensions: [
                 basicSetup,
-                javascript(), // Can be dynamic if you add more languages
+                javascript(),
                 autocompletion(),
                 oneDarkTheme,
                 syntaxHighlighting(amethystHighlightStyle),
                 EditorView.theme({
                     "&": { height: height, fontSize: "12px" },
                     ".cm-scroller": { overflow: "auto" },
-                    "&.cm-focused": { outline: "none" }
+                    "&.cm-focused": { outline: "none" },
+                    ".cm-content": { fontFamily: 'JetBrains Mono, monospace' }
                 }),
                 EditorView.updateListener.of((update) => {
                     if (update.docChanged) {
@@ -83,14 +83,19 @@ const CodeEditor = ({
             view.destroy();
             viewRef.current = null;
         };
-        // Run once on mount to initialize
     }, []);
 
-    // Handle external value updates (e.g., template resets)
+    // Handle external updates (like "Load Boilerplate")
     useEffect(() => {
-        if (viewRef.current && value !== viewRef.current.state.doc.toString()) {
+        const safeValue = getSafeValue(value);
+
+        if (viewRef.current && safeValue !== viewRef.current.state.doc.toString()) {
             viewRef.current.dispatch({
-                changes: { from: 0, to: viewRef.current.state.doc.length, insert: value }
+                changes: {
+                    from: 0,
+                    to: viewRef.current.state.doc.length,
+                    insert: safeValue
+                }
             });
         }
     }, [value]);
