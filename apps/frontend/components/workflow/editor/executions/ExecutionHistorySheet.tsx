@@ -31,7 +31,7 @@ export function ExecutionHistorySheet() {
             title="Execution History"
             description="View past runs and detailed node-level execution logs."
             showContextSettings={false}
-            className={"w-[800px]!"}
+            className={"w-[800px]! p-0!"}
         >
             <div className="flex flex-col gap-4">
                 {selectedExecutionId ? (

@@ -21,7 +21,7 @@ import {toast} from "sonner";
 import {useWorkflowRealtime} from "@/hooks/workflow/useWorkflowRealtime";
 import {db} from "@/lib/db/workflow.db";
 import {useLiveQuery} from "dexie-react-hooks";
-import {Execution} from "@/types/execution";
+import {Execution, ExecutionLog} from "@/types/execution";
 
 export type WorkflowEditorContextType = {
     editorState: IWorkflowEditorState;
@@ -67,6 +67,11 @@ export type WorkflowEditorContextType = {
     // Derived values for ReactFlow
     rfNodes: Node[];
     rfEdges: Edge[];
+
+    logs: ExecutionLog[];
+    setLogs: (logs: ExecutionLog[]) => void;
+    isLogsLoading: boolean;
+    setIsLogsLoading: (val: boolean) => void;
 };
 
 export interface IWorkflowEditorState {
@@ -135,6 +140,9 @@ export function WorkflowEditorProvider({ children }: { children: React.ReactNode
     const [editorState, workflowEditorDispatch] = useReducer(workflowEditorReducer, initialState);
     const [selectedNode, setSelectedNode] = useState<Node | null | undefined>();
     const [selectedHandle, setSelectedHandle] = useState<string | null>(null);
+
+    const [logs, setLogs] = useState<ExecutionLog[]>([]);
+    const [isLogsLoading, setIsLogsLoading] = useState(false);
 
     const isSaving = useRef(false);
     const pendingSave = useRef(false);
@@ -557,17 +565,21 @@ export function WorkflowEditorProvider({ children }: { children: React.ReactNode
     };
     
     
-    const getExecutionLogs = async (executionId: string) => {
+    const getExecutionLogs = useCallback(async (executionId: string) => {
         try{
+            setIsLogsLoading(true);
+
             const token = await getSession();
 
-            const logs = await getExecutionsLogsRequest(executionId, token)
-            console.log("execution logs", logs);
-            return logs;
+            const data = await getExecutionsLogsRequest(executionId, token)
+
+            setLogs(data);
         }catch (e) {
             console.log(e.message);
+        }finally {
+            setIsLogsLoading(false);
         }
-    }
+    }, [logs, setLogs])
 
     const fitNode = (node: WorkflowNode) => {
         fitView({ nodes: [{ id: node.id }], duration: 800, padding: 0.05, maxZoom: 1.1 });
@@ -647,6 +659,10 @@ export function WorkflowEditorProvider({ children }: { children: React.ReactNode
             rfNodes,
             rfEdges,
             getExecutionLogs,
+            logs,
+            setLogs,
+            isLogsLoading,
+            setIsLogsLoading,
         }}>
             {children}
         </WorkflowEditorContext.Provider>
