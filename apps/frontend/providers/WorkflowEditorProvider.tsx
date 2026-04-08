@@ -50,6 +50,8 @@ export type WorkflowEditorContextType = {
     isDeploying: boolean;
     isExecutionsSheetOpen: boolean;
     setIsExecutionsSheetOpen: (vlue: boolean) => void;
+    isWorkflowInspectorOpen: boolean;
+    setIsWorkflowInspectorOpen: (vlue: boolean) => void;
 
     handleSelectTemplate: (template: NodeTemplate, node?: Node) => void;
 
@@ -147,6 +149,7 @@ export function WorkflowEditorProvider({ children }: { children: React.ReactNode
     const [isDeployWorkflowDialogOpen, setIsDeployWorkflowDialogOpen] = useState(false);
     const [isDeploying, setIsDeploying] = useState(false);
     const [isExecutionsSheetOpen, setIsExecutionsSheetOpen] = useState(false);
+    const [isWorkflowInspectorOpen, setIsWorkflowInspectorOpen] = useState(false);
 
     const [editorState, workflowEditorDispatch] = useReducer(workflowEditorReducer, initialState);
     const [runtimeState, runtimeDispatch] = useReducer(runtimeReducer, initialRuntimeState);
@@ -510,7 +513,7 @@ export function WorkflowEditorProvider({ children }: { children: React.ReactNode
                 payload: executionRecord
             })
 
-            await getExecutionLogs(response.executions[0]?.id)
+            // await getExecutionLogs(response.executions[0]?.id)
 
             console.log("Executions", executionRecord)
 
@@ -642,7 +645,7 @@ export function WorkflowEditorProvider({ children }: { children: React.ReactNode
     const loadDeployment = async () => {
         try {
             const token = await getSession();
-            const deployment = await getDeployWorkflowRequest(workflowId, token);
+            const deployment: any[] = await getDeployWorkflowRequest(workflowId, token);
             if (deployment) {
                 workflowEditorDispatch({ type: WorkflowEditorActionType.SET_DEPLOYMENT, payload: deployment });
             }
@@ -774,6 +777,8 @@ export function WorkflowEditorProvider({ children }: { children: React.ReactNode
             isRunning,
             isExecutionsSheetOpen,
             setIsExecutionsSheetOpen,
+            isWorkflowInspectorOpen,
+            setIsWorkflowInspectorOpen,
             handleSelectTemplate,
             saveWorkflowGraph,
             handleRunWorkflow,

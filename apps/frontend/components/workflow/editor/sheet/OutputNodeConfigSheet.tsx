@@ -1,22 +1,19 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { Node } from "reactflow";
 import {
     Terminal,
     Settings2,
     Code2,
     Send,
-    Info,
     Braces,
     ExternalLink,
-    Zap,
-    Layout,
     FileJson,
     Type,
     FileText,
     Globe,
-    Database // Added for Schema icon
+    Database
 } from "lucide-react";
 
 import { useWorkflowEditor } from "@/hooks/workflow/useWorkflowEditor";
@@ -35,7 +32,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { OutputNodeConfig } from "@neuron/shared";
 
 const OUTPUT_FORMATS = [
     { label: "JSON Object", value: "json", icon: <FileJson className="w-3 h-3 text-blue-400" /> },
@@ -50,16 +47,17 @@ const DELIVERY_MODES = [
     { label: "Internal Notification", value: "notification", description: "Push to system UI" },
 ];
 
-export function OutputNodeConfigSheet({ node, open, onOpen }: { node: Node, open: boolean, onOpen: (open: boolean) => void }) {
+function OutputConfigSheet({ node, open, onOpen }: { node: Node, open: boolean, onOpen: (open: boolean) => void }) {
     const { workflowEditorDispatch, editorState: { graph: { nodes, edges }} } = useWorkflowEditor();
 
-    const [config, setConfig] = useState({
+    // 1. Initialize local state from node config using Schema types
+    const [config, setConfig] = useState<OutputNodeConfig>({
         label: "Final Data Output",
         template: "",
         format: {
             type: "json",
             minify: false,
-            syntaxHighlight: true, // Field 1: Added missing field
+            syntaxHighlight: true,
         },
         delivery: {
             mode: "webhook_response",
@@ -67,13 +65,17 @@ export function OutputNodeConfigSheet({ node, open, onOpen }: { node: Node, open
             statusCode: 200,
         },
         includeMetadata: false,
-        outputSchema: { type: "object", fields: [] }, // Field 2: Added missing field
+        outputSchema: { type: "object", fields: [] },
         ...node.data,
     });
 
     const availableVariables = getAvailableUpstreamNodes(node.id, { nodes, edges });
 
+    // 2. Debounced sync to global workflow state
     useEffect(() => {
+        const hasChanged = JSON.stringify(config) !== JSON.stringify(node.data);
+        if (!hasChanged) return;
+
         const timer = setTimeout(() => {
             workflowEditorDispatch({
                 type: WorkflowEditorActionType.UPDATE_NODE,
@@ -91,7 +93,7 @@ export function OutputNodeConfigSheet({ node, open, onOpen }: { node: Node, open
     const handleNestedChange = (category: "format" | "delivery", key: string, value: any) => {
         setConfig(prev => ({
             ...prev,
-            [category]: { ...prev[category as keyof typeof prev], [key]: value }
+            [category]: { ...prev[category], [key]: value }
         }));
     };
 
@@ -103,10 +105,11 @@ export function OutputNodeConfigSheet({ node, open, onOpen }: { node: Node, open
             nodeId={node.id}
             nodeMeta={config?.meta}
             onMetaUpdate={handleChange}
+            executionConfig={config.executionConfig}
+            onExecutionConfigUpdate={(newExec) => handleChange('executionConfig', newExec)}
             className="w-[550px]! p-0! bg-neutral-950/95 backdrop-blur-2xl border-l border-neutral-800"
         >
             <div className="flex flex-col h-full overflow-hidden">
-
                 {/* STATUS SUB-HEADER */}
                 <div className="flex items-center justify-between px-6 py-3 bg-neutral-900/40 border-b border-neutral-800/50">
                     <div className="flex items-center gap-4">
@@ -122,7 +125,6 @@ export function OutputNodeConfigSheet({ node, open, onOpen }: { node: Node, open
 
                 <ScrollArea className="flex-1">
                     <div className="p-6 space-y-8">
-
                         {/* SECTION 1: SERIALIZATION */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-2 mb-2">
@@ -165,7 +167,6 @@ export function OutputNodeConfigSheet({ node, open, onOpen }: { node: Node, open
                                                 className="data-[state=checked]:bg-blue-500"
                                             />
                                         </div>
-                                        {/* Added syntaxHighlight toggle */}
                                         <div className="flex items-center justify-between h-9 bg-neutral-900/50 border border-neutral-800 rounded-lg px-3">
                                             <span className="text-[10px] text-neutral-400">Syntax Highlight</span>
                                             <Switch
@@ -189,7 +190,7 @@ export function OutputNodeConfigSheet({ node, open, onOpen }: { node: Node, open
                             </div>
                         </div>
 
-                        {/* SECTION 2: DELIVERY PROTOCOL (Unchanged) */}
+                        {/* SECTION 2: DELIVERY PROTOCOL */}
                         <div className="space-y-4 pt-4 border-t border-neutral-900">
                             <div className="flex items-center gap-2 mb-2">
                                 <div className="p-1.5 bg-emerald-500/10 rounded-md">
@@ -267,7 +268,6 @@ export function OutputNodeConfigSheet({ node, open, onOpen }: { node: Node, open
                                     />
                                 </div>
 
-                                {/* Added outputSchema input layer */}
                                 <div className="space-y-2 pt-2 border-t border-neutral-800/50">
                                     <label className="text-[10px] font-bold text-neutral-500 uppercase flex items-center gap-1.5">
                                         <Database className="w-3 h-3" /> Type Contract (Schema)
@@ -295,7 +295,7 @@ export function OutputNodeConfigSheet({ node, open, onOpen }: { node: Node, open
                             </div>
                         </div>
 
-                        {/* FOOTER (Unchanged) */}
+                        {/* FOOTER */}
                         <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-4 flex gap-4">
                             <div className="p-2 bg-emerald-500/10 rounded-lg h-fit">
                                 <Globe className="w-4 h-4 text-emerald-400" />
@@ -316,3 +316,5 @@ export function OutputNodeConfigSheet({ node, open, onOpen }: { node: Node, open
         </SheetWrapper>
     );
 }
+
+export const OutputNodeConfigSheet = memo(OutputConfigSheet);

@@ -1,8 +1,9 @@
 import { CheckCircle2, CircleDashed, Clock, XCircle, ChevronRight } from "lucide-react";
 import {cn} from "@/lib/utils";
 import {formatDistanceToNow} from "date-fns";
+import {Execution} from "@/types";
 
-function ExecutionCard({ execution, onClick }: { execution: any, onClick: () => void }) {
+function ExecutionCard({ execution, onClick, currentExecId = "" }: { execution: Execution, onClick: () => void, currentExecId?: string }) {
     const statusConfig = {
         success: { icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/10" },
         failed: { icon: XCircle, color: "text-red-500", bg: "bg-red-500/10" },
@@ -16,7 +17,8 @@ function ExecutionCard({ execution, onClick }: { execution: any, onClick: () => 
     return (
         <button
             onClick={onClick}
-            className="group w-full flex items-center justify-between p-4 rounded-xl border border-neutral-800/50 bg-neutral-900/20 hover:bg-neutral-900/40 hover:border-neutral-700 transition-all text-left"
+            className={cn("group w-full flex items-center justify-between p-4 rounded-xl border border-neutral-800/50 bg-neutral-900/20 hover:bg-neutral-900/40 hover:border-neutral-700 transition-all text-left",
+               currentExecId === execution.id && "bg-neutral-900/40 border-neutral-700" )}
         >
             <div className="flex items-center gap-4">
                 <div className={cn("p-2 rounded-lg border border-white/5", config.bg)}>

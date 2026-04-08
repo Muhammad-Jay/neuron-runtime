@@ -4,6 +4,7 @@ import {ReactFlowProvider} from "reactflow";
 import {ReactNode} from "react";
 import {NodeOutputProvider} from "@/providers/NodeOutputContext";
 import {WorkflowEditorProvider} from "@/providers/WorkflowEditorProvider";
+import {ValidationProvider} from "@/providers/ValidationContext";
 
 export const EditorProvider = ({ children }: { children: ReactNode }) => {
 
@@ -11,7 +12,9 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
         <ReactFlowProvider>
             <NodeOutputProvider>
                 <WorkflowEditorProvider>
-                            {children}
+                    <ValidationProvider>
+                        {children}
+                    </ValidationProvider>
                 </WorkflowEditorProvider>
             </NodeOutputProvider>
         </ReactFlowProvider>

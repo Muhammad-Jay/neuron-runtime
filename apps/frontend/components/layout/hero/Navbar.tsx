@@ -10,13 +10,15 @@ import {SectionType} from "@/components/layout/hero/HeroSection";
 
 const NAV_LINKS = [
     { name: "Features", href: "#features", icon: Zap },
-    { name: "Docs", href: "/docs", icon: BookOpen },
     { name: "Capabilities", href: "#capabilities", icon: Layers },
+    { name: "Demos", href: "#demos", icon: BookOpen },
+    { name: "Docs", href: "/docs", icon: BookOpen },
 ]
 
 const sectionMapping: Record<string, SectionType> = {
     "Features": "features",
     "Capabilities": "capabilities",
+    "Demos": "demos",
     "Docs": "intro"
 };
 
@@ -57,8 +59,8 @@ export function Navbar() {
 
                     {/* LEFT: LOGO */}
                     <Link href="/" className="flex items-center gap-2 group">
-                        <div className="w-8 h-8 bg-white text-black rounded-lg flex items-center justify-center transition-transform group-hover:rotate-12">
-                            <Cpu size={18} strokeWidth={2.5} />
+                        <div className="w-8 h-8  rounded-lg flex items-center justify-center transition-transform group-hover:rotate-12">
+                            <Zap size={18} className={"text-white"} strokeWidth={2.5} />
                         </div>
                         <span className="text-[14px] font-black uppercase tracking-[0.3em] text-white">
                         Neuron

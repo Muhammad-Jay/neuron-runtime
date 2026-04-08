@@ -23,9 +23,9 @@ interface InspectorProps {
 }
 
 const positionClasses: Record<PanelPosition, string> = {
-    'Top Left': 'top-[60px] left-[60px]',
+    'Top Left': 'top-[30px] left-[65px]',
     'Bottom Left': 'bottom-4 left-4',
-    'Top Right': 'top-[10%] right-4',
+    'Top Right': 'top-[30px] right-[70px]',
     'Bottom Right': 'bottom-4 right-4',
     'Top Center': 'top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2',
     'Bottom Center': 'bottom-4 left-1/2 -translate-x-1/2',
@@ -53,8 +53,8 @@ export function EditorPanel({
                     animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
                     exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
                     className={cn(
-                        "fixed z-50 flex w-[300px] h-[80dvh] flex-col overflow-hidden",
-                        "border border-neutral-800 bg-neutral-900/60 backdrop-blur-2xl shadow-2xl rounded-lg",
+                        "fixed z-60 flex w-[300px] h-[80dvh] flex-col overflow-hidden",
+                        "border border-neutral-800 bg-neutral-900/60 backdrop-blur-2xl shadow-2xl rounded-xl",
                         positionClasses[position],
                         width,
                         className

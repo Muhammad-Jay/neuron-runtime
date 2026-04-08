@@ -8,12 +8,14 @@ import {cn} from "@/lib/utils";
 export function ExecutionFeed({
                                   executions,
                                   loading,
+                                  currentExecId,
     logs,
     onClick,
                               }: {
     executions: any[];
     loading: boolean;
     logs: boolean,
+    currentExecId?: string,
     onClick: (executionId: string) => Promise<Record<string, ExecutionLog>>;
 }) {
     return (
@@ -49,6 +51,7 @@ export function ExecutionFeed({
                         executions.map((exec) => (
                             <ExecutionCard
                                 key={exec.id}
+                                currentExecId={currentExecId}
                                 execution={exec}
                                 onClick={() => onClick(exec.id)}
                             />

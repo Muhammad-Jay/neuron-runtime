@@ -4,6 +4,7 @@ import type {
     GlobalVariable,
     IGlobalVariablesDefinition,
     NewWorkflowType,
+    NodeExecutionConfig,
     WorkflowDefinition,
     WorkflowTableSchemaType,
     WorkflowType
@@ -12,6 +13,7 @@ import type {FieldInput, NodeExecutionStatus, NodeType, SchemaField, WorkflowNod
 import {Edge, Node, NodeProps} from "reactflow";
 import type {WorkflowEdge} from "@neuron/shared";
 import crypto from "crypto"
+import {WorkflowNodeError} from "@/providers/ValidationContext";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -243,7 +245,7 @@ export function encrypt(text: string) {
     };
 }
 
-export function decrypt(payload: VaultPayload) {
+export function decrypt(payload: any) {
     if (!payload || !payload.content || !payload.iv || !payload.tag) {
         console.error("[Crypto] Malformed decryption payload:", payload);
         throw new Error("Decryption failed: Missing content, iv, or tag.");
@@ -318,3 +320,70 @@ export function arrayToGlobalVariables(variables: GlobalVariable[]): IGlobalVari
 export function globalVariablesToArray(variables: IGlobalVariablesDefinition): GlobalVariable[] {
     return Object.entries(variables).map(([key, value]) => value)
 }
+
+export function getNodeExecutionConfig(
+    config?: Partial<NodeExecutionConfig>
+): NodeExecutionConfig {
+    return {
+        retry: {
+            enabled: false,
+            maxAttempts: 1,
+            delayMs: 0,
+            strategy: "fixed",
+            ...config?.retry,
+        },
+        timeout: {
+            enabled: false,
+            durationMs: 30000,
+            ...config?.timeout,
+        },
+        errorHandling: {
+            continueOnError: false,
+            ...config?.errorHandling,
+        },
+        async: {
+            enabled: false,
+            detach: false,
+            ...config?.async,
+        },
+        cache: {
+            enabled: false,
+            ttlMs: 0,
+            ...config?.cache,
+        },
+        rateLimit: {
+            enabled: false,
+            maxPerSecond: 10,
+            ...config?.rateLimit,
+        },
+        concurrency: {
+            limit: 1,
+            ...config?.concurrency,
+        },
+        logging: {
+            enabled: true,
+            level: "minimal",
+            ...config?.logging,
+        },
+    };
+}
+
+export const getNodeValidationStyles = (nodeError: WorkflowNodeError | null) => {
+    if (!nodeError || nodeError.errors.length === 0) {
+        return " ";
+    }
+
+    const hasCritical = nodeError.errors.some(e => e.level === "error");
+
+    if (hasCritical) {
+        // Critical Error Styling (Red)
+        return cn(
+            "border-red-500!  ring-2 ring-red-500! bg-red-500/20 shadow-[0_0_12px_rgba(255,0,0,0.25)]"
+        );
+    }
+
+    // Warning Styling (Amber/Yellow)
+    return cn(
+        "border-amber-500/40 bg-amber-500/15 shadow-[0_0_15px_rgba(245,158,11,0.05)]"
+    );
+};

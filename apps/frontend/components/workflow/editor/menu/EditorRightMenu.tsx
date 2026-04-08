@@ -1,14 +1,20 @@
-import { Database, History, Variable } from "lucide-react";
+import {Activity, Database, History, Variable} from "lucide-react";
 import { useWorkflowEditor } from "@/hooks/workflow/useWorkflowEditor";
 import { PanelWrapper } from "@/components/workflow/editor/Panel/PanelWrapper";
 import {TooltipButton} from "@/components/workflow/ToolTipButton";
+import {useValidation} from "@/hooks/useValidation";
+import {useMemo} from "react";
 
 export function EditorRightMenu() {
     const {
-        editorState,
         setIsExecutionsSheetOpen,
-        setIsGlobalVariableSheetOpen
+        setIsGlobalVariableSheetOpen,
+        isWorkflowInspectorOpen,
+        setIsWorkflowInspectorOpen,
     } = useWorkflowEditor();
+
+    const { isValid, errors } = useValidation();
+    const errorCount = useMemo(() => Object.keys(errors).length, [errors]);
 
     return (
         <PanelWrapper position="top-right" width="w-auto" className="mt-24 mr-2!">
@@ -31,6 +37,19 @@ export function EditorRightMenu() {
                     side={"left"}
                     onClick={() => setIsGlobalVariableSheetOpen(true)}
                 />
+
+                {!isValid && (
+                    <div className="relative">
+                        <TooltipButton
+                            icon={(Activity)}
+                            label={`Workflow Editor Errors`}
+                            side={"left"}
+                            className="text-amber-500 hover:text-amber-400 hover:bg-amber-500/10 border-amber-500/20"
+                            onClick={() => setIsWorkflowInspectorOpen(!isWorkflowInspectorOpen)}
+                        />
+                        <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse pointer-events-none" />
+                    </div>
+                )}
             </div>
         </PanelWrapper>
     );

@@ -30,7 +30,6 @@ function ConditionConfigSheet({
 }) {
     const { workflowEditorDispatch, editorState: { graph: { nodes, edges }} } = useWorkflowEditor();
 
-    // 1. Initialize local state from node data
     const [config, setConfig] = useState<ConditionNodeConfig>({
         leftValue: node.data?.leftValue || "",
         operator: node.data?.operator || "==",
@@ -40,8 +39,11 @@ function ConditionConfigSheet({
 
     const availableVariables = getAvailableUpstreamNodes(node.id, { nodes, edges });
 
-    // 2. Debounced sync to the global workflow state
     useEffect(() => {
+        const hasChanged = JSON.stringify(config) !== JSON.stringify(node.data);
+
+        if (!hasChanged) return;
+
         const timer = setTimeout(() => {
             workflowEditorDispatch({
                 type: WorkflowEditorActionType.UPDATE_NODE,
@@ -64,6 +66,9 @@ function ConditionConfigSheet({
             title="Condition Logic"
             nodeId={node.id}
             nodeMeta={config.meta}
+            executionConfig={config.executionConfig}
+            onExecutionConfigUpdate={(newExec) => handleChange('executionConfig', newExec)}
+            className="w-[550px]! h-full! p-0! bg-neutral-950/95 backdrop-blur-xl border-l border-neutral-800"
             onMetaUpdate={handleChange}
         >
             <div className="space-y-6 mt-6">

@@ -1,3 +1,7 @@
+/**
+ * CORE TYPE DEFINITIONS
+ */
+
 export type NodeExecutionStatus =
     | "idle"
     | "running"
@@ -15,7 +19,212 @@ export type NodeType =
     | "decisionNode"
     | "outputNode"
     | "respondNode"
-    | "contextNode";
+    | "contextNode"
+    | "integrationNode";
+
+// --- SHARED BASE STRUCTURES ---
+export type NodeMetaType = {
+    meta: {
+        label: string;
+        description?: string;
+    }
+}
+
+export interface ContextRegistrationSettings {
+    persistToContext?: boolean;
+    contextNodeId?: string; // Which context node to target
+    alias?: string;         // How the data appears in the context (e.g., "userData")
+}
+
+export type NodeExecutionConfig = {
+    retry?: {
+        enabled: boolean;
+        maxAttempts: number;     // total attempts (including first)
+        delayMs: number;         // base delay
+        strategy?: "fixed" | "exponential";
+    };
+    timeout?: {
+        enabled: boolean;
+        durationMs: number;
+    };
+    errorHandling?: {
+        continueOnError: boolean;   // don't break workflow
+        fallbackNodeId?: string;    // optional redirect
+    };
+    async?: {
+        enabled: boolean;           // run in background
+        detach?: boolean;           // don't wait at all
+    };
+    cache?: {
+        enabled: boolean;
+        ttlMs: number;
+        key?: string;               // override cache key
+    };
+    rateLimit?: {
+        enabled: boolean;
+        maxPerSecond: number;
+    };
+    concurrency?: {
+        limit: number;              // parallel executions allowed
+    };
+    logging?: {
+        enabled: boolean;
+        level?: "minimal" | "verbose";
+    };
+};
+
+/**
+ * The Master Configuration Base.
+ */
+export interface BaseNodeConfig extends ContextRegistrationSettings, NodeMetaType {
+    input?: any;
+    output?: any;
+    outputSchema?: "";
+    executionConfig?: NodeExecutionConfig; // Unified execution settings
+}
+
+export interface BaseNode<TConfig = BaseNodeConfig> {
+    id: string;
+    type: NodeType;
+    workflowId?: string;
+    config: TConfig;
+    position: {
+        x: number;
+        y: number;
+    };
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+// --- DATA TYPES & SCHEMAS ---
+
+export type PrimitiveType = "string" | "number" | "boolean";
+
+export type SchemaField = {
+    type: PrimitiveType | "object" | "array";
+    children?: Record<string, SchemaField>;
+    arrayItem?: SchemaField;
+};
+
+export interface FieldInput {
+    id: string;
+    name: string;
+    type: PrimitiveType | "object" | "array";
+    children?: FieldInput[];
+    arrayItem?: FieldInput;
+}
+
+// --- SPECIFIC NODE CONFIGURATIONS ---
+
+export interface TriggerNodeConfig extends BaseNodeConfig {
+    triggerType: "manual" | "webhook" | "schedule";
+}
+
+export interface HttpRequestNodeConfig extends BaseNodeConfig {
+    url: string;
+    method: "GET" | "POST" | "PUT" | "DELETE";
+    headers?: Record<string, string>;
+    body?: Record<string, any>;
+}
+
+export interface DebugNodeConfig extends BaseNodeConfig {
+    message: string;
+}
+
+export interface ConditionNodeConfig extends BaseNodeConfig {
+    leftValue: string;
+    operator: "==" | "!=" | ">" | "<" | "contains" | "exists";
+    rightValue: string;
+}
+
+export interface TransformNodeConfig extends BaseNodeConfig {
+    code: string;
+}
+
+export interface LLMNodeConfig extends BaseNodeConfig {
+    provider: string;
+    model: string;
+    systemPrompt: string;
+    userPrompt: string;
+    temperature: number;
+    maxTokens: number;
+    apiKey: string;
+    jsonMode: boolean;
+}
+
+export interface DecisionRule {
+    id: string;
+    operator: "==" | "!=" | ">" | "<" | "includes" | "exists";
+    value: string;
+    transforms: string[];
+    label: string;
+}
+
+export interface DecisionNodeConfig extends BaseNodeConfig {
+    input: string;
+    inputTransforms: string[];
+    rules: DecisionRule[];
+    includeDefault: boolean;
+}
+
+export interface IntegrationNodeConfig extends BaseNodeConfig {
+    connectionId: string;
+    integrationId: string;
+    resource: string;
+    action: string;
+    parameters: Record<string, any>;
+}
+
+export type OutputDeliveryMode = "webhook_response" | "stored_result" | "notification";
+export type OutputFormatType = "json" | "markdown" | "text" | "html" | "csv";
+
+export interface OutputNodeConfig extends BaseNodeConfig {
+    label: string;
+    template: string;
+    format: {
+        type: OutputFormatType;
+        minify?: boolean;
+        syntaxHighlight?: boolean;
+    };
+    delivery: {
+        mode: OutputDeliveryMode;
+        isPrimary: boolean;
+        statusCode?: number;
+    };
+    includeMetadata: boolean;
+}
+
+export interface RespondNodeConfig extends BaseNodeConfig {
+    statusCode: number | string;
+    headers: Record<string, string>;
+    body: Record<string, any> | string;
+    options: {
+        minify: boolean;
+        includeTraceId: boolean;
+        errorOnEmpty: boolean;
+    };
+    sourceNodeId?: string;
+    attachContext: boolean;
+}
+
+export interface ContextNodeConfig extends BaseNodeConfig {
+    label: string;
+    fields: Record<string, any>;
+}
+
+// --- NODE WRAPPERS & UNIONS ---
+
+export type TriggerNode = BaseNode<TriggerNodeConfig>;
+export type HttpRequestNode = BaseNode<HttpRequestNodeConfig>;
+export type DebugNode = BaseNode<DebugNodeConfig>;
+export type ConditionNode = BaseNode<ConditionNodeConfig>;
+export type TransformNode = BaseNode<TransformNodeConfig>;
+export type LLMNode = BaseNode<LLMNodeConfig>;
+export type DecisionNode = BaseNode<DecisionNodeConfig>;
+export type IntegrationNode = BaseNode<IntegrationNodeConfig>;
+export type OutputNode = BaseNode<OutputNodeConfig>;
+export type RespondNode = BaseNode<RespondNodeConfig>;
+export type ContextNode = BaseNode<ContextNodeConfig>;
 
 export type WorkflowNode =
     | TriggerNode
@@ -25,49 +234,13 @@ export type WorkflowNode =
     | TransformNode
     | LLMNode
     | DecisionNode
+    | IntegrationNode
     | OutputNode
     | RespondNode
     | ContextNode;
 
-
-export type NodeMetaType = {
-    meta: {
-        label: string;
-        description?: string;
-    }
-}
-
-export interface BaseNode<TConfig = unknown>{
-    id: string
-    type: NodeType
-    workflowId?: string
-    config: TConfig
-    position: {
-        x: number,
-        y: number,
-    }
-    createdAt?: string
-    updatedAt?: string
-}
-
-export type PrimitiveType = "string" | "number" | "boolean";
-
-export type SchemaField = {
-    type: PrimitiveType | "object" | "array";
-    children?: Record<string, SchemaField>; // for nested objects
-    arrayItem?: SchemaField;                // for array types
-};
-
-export interface FieldInput {
-    id: string;                            // unique id for react key
-    name: string;
-    type: PrimitiveType | "object" | "array";
-    children?: FieldInput[];
-    arrayItem?: FieldInput;
-}
-
 export type NodeConfigType =
-    TriggerNodeConfig
+    | TriggerNodeConfig
     | HttpRequestNodeConfig
     | DebugNodeConfig
     | TransformNodeConfig
@@ -78,213 +251,3 @@ export type NodeConfigType =
     | OutputNodeConfig
     | RespondNodeConfig
     | ContextNodeConfig;
-
-export interface TriggerNodeConfig extends ContextRegistrationSettings, NodeMetaType {
-    triggerType: "manual" | "webhook" | "schedule",
-    input?: any,
-    output?: any,
-    outputSchema?: any,
-}
-
-export type TriggerNode = BaseNode<TriggerNodeConfig> & {
-    type: NodeType,
-}
-
-export interface HttpRequestNodeConfig extends ContextRegistrationSettings, NodeMetaType {
-    url: string
-    method: "GET" | "POST" | "PUT" | "DELETE"
-    headers?: Record<string, string>
-    body?: Record<string, any>,
-    input?: any,
-    output?: any,
-    outputSchema?: any,
-}
-
-export type HttpRequestNode = BaseNode<HttpRequestNodeConfig> & {
-    type: NodeType
-}
-
-export interface DebugNodeConfig extends ContextRegistrationSettings, NodeMetaType {
-    message: string,
-    input?: any,
-    output?: any,
-    outputSchema?: any,
-}
-export type DebugNode = BaseNode<DebugNodeConfig> & {
-    type: NodeType
-}
-
-export interface ConditionNodeConfig extends ContextRegistrationSettings, NodeMetaType {
-    // Example: { "left": "{{httpNode_1.status}}", "op": "==", "right": "200" }
-    leftValue: string;
-    operator: "==" | "!=" | ">" | "<" | "contains" | "exists";
-    rightValue: string;
-    input?: any;
-    output?: any; // Will store boolean result for debugging
-    outputSchema?: any;
-}
-
-export type ConditionNode = BaseNode<ConditionNodeConfig> & {
-    type: "condition";
-};
-
-// --- TRANSFORM NODE ---
-export interface TransformNodeConfig extends ContextRegistrationSettings, NodeMetaType {
-    code: string;
-    input?: any;
-    output?: any;
-    outputSchema?: any;
-}
-
-export type TransformNode = BaseNode<TransformNodeConfig> & {
-    type: "transform";
-};
-
-
-export interface LLMNodeConfig extends ContextRegistrationSettings, NodeMetaType {
-    provider: string;
-    model: string;
-    systemPrompt: string;
-    userPrompt: string;
-    temperature: number;
-    maxTokens: number;
-    apiKey: string;
-    jsonMode: boolean;
-    outputSchema: string;
-}
-
-
-export type LLMNode = BaseNode<LLMNodeConfig> & {
-    type: "llmNode";
-}
-
-// --- DECISION NODE ---
-export interface DecisionRule {
-    id: string;
-    operator: "==" | "!=" | ">" | "<" | "includes" | "exists";
-    value: string;
-    transforms: string[];
-    label: string;
-}
-
-export interface DecisionNodeConfig extends ContextRegistrationSettings, NodeMetaType {
-    input: string;            // The {{variable}} being evaluated
-    inputTransforms: string[]; // Global transforms (e.g. ["trim", "toLowerCase"])
-    rules: DecisionRule[];
-    includeDefault: boolean,
-    output?: any;
-    outputSchema?: any;
-}
-
-export type DecisionNode = BaseNode<DecisionNodeConfig> & {
-    type: "decisionNode";
-};
-
-// --- INTEGRATION NODE ---
-export interface IntegrationNodeConfig extends ContextRegistrationSettings, NodeMetaType {
-    connectionId: string;    // Reference to a saved Connection
-    integrationId: string;   // "slack", "whatsapp", "resend"
-    resource: string;        // "message", "channel", "user"
-    action: string;          // "send", "list", "delete"
-    parameters: Record<string, any>; // The actual mapped fields (e.g. { text: "{{...}}" })
-}
-
-export type IntegrationNode = BaseNode<IntegrationNodeConfig> & {
-    type: "integrationNode";
-}
-
-
-// --- OUTPUT NODE ---
-export type OutputDeliveryMode =
-    | "webhook_response"  // Returns immediately to the caller
-    | "stored_result"     // Saves to the Lazarus execution logs
-    | "notification";     // Pushes to a UI toast or internal alert
-
-export type OutputFormatType =
-    | "json"
-    | "markdown"
-    | "text"
-    | "html"
-    | "csv";
-
-export interface OutputNodeConfig extends ContextRegistrationSettings, NodeMetaType {
-    // The visual title of this specific output (e.g., "Final Summary")
-    label: string;
-
-    // The raw content template supporting {{Global.VAR}} and {{nodeId.output}}
-    template: string;
-
-    // Professional formatting options
-    format: {
-        type: OutputFormatType;
-        minify?: boolean;        // For JSON/HTML
-        syntaxHighlight?: boolean; // For UI rendering in Jaguar
-    };
-
-    // How the data should be handled after execution
-    delivery: {
-        mode: OutputDeliveryMode;
-        isPrimary: boolean;      // If true, this is the main result of the entire workflow
-        statusCode?: number;     // Relevant if triggerType was 'webhook'
-    };
-
-    // Metadata for the Lazarus Engine
-    includeMetadata: boolean;    // Includes execution time, tokens used, etc.
-    output?: any;                // The final resolved string/object
-    outputSchema?: SchemaField;  // For downstream type safety
-}
-
-export type OutputNode = BaseNode<OutputNodeConfig> & {
-    type: "outputNode";
-};
-
-
-// --- RESPOND NODE ---
-export interface RespondNodeConfig extends ContextRegistrationSettings, NodeMetaType {
-    // Allows static numbers (200) or dynamic lookup ("{{logic_1.code}}")
-    statusCode: number | string;
-
-    // Map of HTTP headers (e.g., { "Content-Type": "application/json" })
-    headers: Record<string, string>;
-
-    // The JSON payload. Supports nested objects and template strings.
-    // Example: { "message": "Success", "data": "{{llmNode_1.output}}" }
-    body: Record<string, any> | string;
-
-    // Behavior flags for the Lazarus Execution Engine
-    options: {
-        minify: boolean;           // Strips whitespace from response
-        includeTraceId: boolean;   // Appends Lazarus-Trace-ID for debugging
-        errorOnEmpty: boolean;     // Throws workflow error if body is undefined
-    };
-
-    sourceNodeId?: string;
-
-    attachContext: boolean;
-
-    // Metadata for the Jaguar UI and type-safety
-    outputSchema?: SchemaField;
-}
-
-export type RespondNode = BaseNode<RespondNodeConfig> & {
-    type: "respondNode";
-};
-
-// --- CONTEXT NODE ---
-export interface ContextNodeConfig extends ContextRegistrationSettings, NodeMetaType {
-    label: string;
-
-    fields: Record<string, any>;
-
-    outputSchema?: SchemaField;
-}
-
-export type ContextNode = BaseNode<ContextNodeConfig> & {
-    type: "contextNode";
-};
-
-export interface ContextRegistrationSettings {
-    persistToContext?: boolean;
-    contextNodeId?: string; // Which context node to target
-    alias?: string;         // How the data appears in the context (e.g., "userData")
-}

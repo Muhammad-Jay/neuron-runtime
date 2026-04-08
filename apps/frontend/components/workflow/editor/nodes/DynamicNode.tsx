@@ -7,7 +7,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ContextMenuItem } from "@/components/ui/context-menu";
 import { NodeHandle } from "./NodeHandle";
 
-import {cn, getNodeColor, getNodeStatusStyles, getPreviousNode, nodePropsToReactflowNode} from "@/lib/utils";
+import {
+    cn,
+    getNodeColor,
+    getNodeStatusStyles,
+    getNodeValidationStyles,
+    getPreviousNode,
+    nodePropsToReactflowNode
+} from "@/lib/utils";
 import { Cpu, Zap, Bug } from "lucide-react";
 
 import { useWorkflowEditor } from "@/hooks/workflow/useWorkflowEditor";
@@ -19,6 +26,7 @@ import {NodeStatusIndicator} from "@/components/workflow/editor/nodes/NodeStatus
 import {NodePreview} from "@/components/workflow/editor/nodes/NodePreview";
 import {DecisionNodeHandlesRenderer} from "@/components/workflow/editor/nodes/DecisionNodeHandlesRenderer";
 import {DynamicNodeToolbar} from "@/components/workflow/editor/nodes/toolbar/DynamicNodeToolbar";
+import { useValidation } from "@/hooks/useValidation";
 
 const ICON_MAP: Record<string, ReactNode> = {
     trigger: <Zap  size={50}  className="text-amber-500" />,
@@ -33,9 +41,13 @@ export default function DynamicNode(node: NodeProps) {
         editorState,
         workflowEditorDispatch,
         setSheetOpen,
-        selectedNode,
         setSelectedNode,
     } = useWorkflowEditor();
+    const { getNodeErrors } = useValidation();
+
+    const nodeError = useMemo(() => getNodeErrors(id), [getNodeErrors, id]);
+
+    const validationStyles = useMemo(() => getNodeValidationStyles(nodeError), [nodeError]);
 
     const color = getNodeColor(type);
     const status = editorState.runtime?.nodeStatus?.[id] ?? editorState.runtime?.nodeErrors?.[id] ?? "idle"
@@ -68,9 +80,16 @@ export default function DynamicNode(node: NodeProps) {
                         "group flex flex-col gap-1.5 w-[200px] h-fit transition-all p-3 bg-neutral-800/25 backdrop-blur-sm border-0 rounded-xl relative",
                         statusClass,
                         selected && "ring-2! ring-primary!",
+                        nodeError && validationStyles,
                         node.type === "contextNode" && "w-[250px]"
                     )}
                 >
+                    {nodeError && (
+                        <div className={cn(
+                            "absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-black",
+                            nodeError.errors.some(e => e.level === "error") ? "bg-red-500" : "bg-amber-500"
+                        )} />
+                    )}
 
                     {/* Toolbar */}
                     <DynamicNodeToolbar

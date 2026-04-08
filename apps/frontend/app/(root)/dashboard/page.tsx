@@ -11,7 +11,7 @@ import {ExecutionLoadingSkeleton} from "@/components/workflow/editor/executions/
 import {ScrollArea} from "@/components/ui/scroll-area";
 
 export default function DashboardPage() {
-    const { metrics, executions, loading, getExecutionLogs, isLogsLoading, logs } = useDashboard();
+    const { metrics, executions, loading, getExecutionLogs, isLogsLoading, logs, currentExecId } = useDashboard();
 
     return (
         <div className="flex flex-col gap-6 p-8 bg-black text-white min-h-screen font-sans">
@@ -60,6 +60,7 @@ export default function DashboardPage() {
                         executions={executions}
                         onClick={getExecutionLogs}
                         logs={Object.entries(logs).length > 0}
+                        currentExecId={currentExecId}
                         loading={loading} />
 
                     {isLogsLoading ?  (<ExecutionLoadingSkeleton />) : Object.entries(logs).length > 0 && (

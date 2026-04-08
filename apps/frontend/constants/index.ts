@@ -1,5 +1,4 @@
 import type {NodeConfigType} from "@neuron/shared";
-// @/constants/integrations-hub.ts
 import {
     Slack,
     Github,
@@ -14,9 +13,36 @@ import {
     Layers,
     Terminal,
     GitBranch,
-    Share2, Zap, Brain, Shield, GitMerge, Activity
+    Share2, Zap, Brain, Shield, GitMerge, Activity,
+    Send
 } from "lucide-react";
 import {SectionType} from "@/components/layout/hero/HeroSection";
+
+export * from "./nodeTemplate";
+
+export const neuronSteps = [
+    {
+        id: 1,
+        icon: Zap,
+        title: "Event Ingestion",
+        description: "Neuron acts as your system’s entry point, capturing events from APIs, webhooks, and databases in real time. Every signal is normalized and prepared for downstream execution.",
+        position: 'top-left',
+    },
+    {
+        id: 2,
+        icon: Cpu,
+        title: "Workflow Execution",
+        description: "Neuron processes incoming data through node-based workflows, applying logic, conditions, and AI-driven decisions to determine the correct execution path.",
+        position: 'center-right',
+    },
+    {
+        id: 3,
+        icon: Activity,
+        title: "Action & Delivery",
+        description: "Results are executed instantly triggering APIs, automations, or external systems while maintaining a structured execution trace for full visibility.",
+        position: 'bottom-left',
+    }
+];
 
 export type AuthMethod = "oauth" | "apikey";
 
@@ -87,215 +113,6 @@ export enum WorkflowEditorActionType {
     UPDATE_EXECUTIONS = "UPDATE_EXECUTIONS",
     DELETE_EXECUTIONS = "DELETE_EXECUTIONS",
 }
-
-export interface NodeTemplate {
-    key: string;
-    type: string;
-    label: string;
-    category: string;
-    description: string;
-    defaultConfig: NodeConfigType;
-}
-
-export const NODE_TEMPLATES: NodeTemplate[] = [
-    {
-        key: "start",
-        type: "trigger",
-        label: "Trigger Node",
-        category: "Logic",
-        description: "Entry point of the workflow",
-        defaultConfig: {
-            triggerType: "schedule",
-        },
-    },
-    {
-        key: "http",
-        type: "httpNode",
-        label: "HTTPS Request",
-        category: "Network",
-        description: "Make an external API request",
-        defaultConfig: {
-            url: "",
-            method: "GET",
-            headers: {},
-            body: {}
-        },
-    },
-    {
-        key: "debug",
-        type: "debug",
-        label: "Debug",
-        category: "Network",
-        description: "Branch based on logic",
-        defaultConfig: {
-            message: "",
-        },
-    },
-    {
-        key: "condition",
-        type: "condition",
-        label: "Condition",
-        category: "Logic",
-        description: "Branch the workflow based on logic",
-        defaultConfig: {
-            leftValue: "",
-            operator: "==",
-            rightValue: "",
-        },
-    },
-    {
-        key: "decision",
-        type: "decisionNode", // Ensure this matches your React Flow node type
-        label: "Decision",
-        category: "Logic",
-        description: "Branch the workflow into multiple paths based on rules",
-        defaultConfig: {
-            input: "", // The global source (supports {{vars}})
-            includeDefault: true,
-            inputTransforms: [],  // Array of transforms: e.g., ['trim', 'toLowerCase']
-            rules: [
-                {
-                    id: crypto.randomUUID(),
-                    operator: "==",
-                    value: "",
-                    transforms: [],
-                    label: "Case 1"
-                }
-            ],
-        },
-    },
-    {
-        key: "transform",
-        type: "transform",
-        label: "Transform",
-        category: "Logic",
-        description: "Transform data using JavaScript",
-        defaultConfig: {
-            code: "return inputs;",
-        },
-    },
-    {
-        key: "llm",
-        type: "llmNode",
-        label: "LLM Completion",
-        category: "AI",
-        description: "Generate text using AI models (GPT, Claude, Gemini)",
-        defaultConfig: {
-            provider: "openai",
-            model: "gpt-4o",
-            systemPrompt: "You are a helpful assistant.",
-            userPrompt: "",
-            temperature: 0.7,
-            apiKey: "",
-            maxTokens: 1000,
-        },
-    },
-
-    {
-        key: "slack-send-message",
-        type: "integrationNode", // The engine still sees this as an integration
-        label: "Slack: Send Message",
-        category: "Communication",
-        description: "Post a message to a Slack channel or DM.",
-        defaultConfig: {
-            connectionId: "",
-            integrationId: "slack",
-            resource: "chat",
-            action: "postMessage",
-            parameters: {
-                channel: "",
-                text: "Hello from Lazarus! {{inputs.previous_node.data}}"
-            }
-        }
-    },
-    {
-        key: "whatsapp-send-template",
-        type: "integrationNode",
-        label: "WhatsApp: Send Template",
-        category: "Communication",
-        description: "Send an automated WhatsApp message via Meta API.",
-        defaultConfig: {
-            connectionId: "",
-            integrationId: "whatsapp",
-            resource: "messages",
-            action: "sendTemplate",
-            parameters: {
-                phoneNumber: "",
-                templateName: ""
-            }
-        }
-    },
-
-    {
-        key: "output",
-        type: "outputNode",
-        label: "Final Output",
-        category: "Logic", // Or "Terminal" if you want to create a new group
-        description: "Configure the final data delivery and response format.",
-        defaultConfig: {
-            label: "Workflow Result",
-            template: "{\n  \"status\": \"success\",\n  \"timestamp\": \"{{system.now}}\",\n  \"data\": {{last_node.output}}\n}",
-            format: {
-                type: "json",
-                minify: false,
-            },
-            delivery: {
-                mode: "webhook_response",
-                isPrimary: true,
-                statusCode: 200,
-            },
-            includeMetadata: false,
-        },
-    },
-
-    {
-        key: "respond",
-        type: "respondNode",
-        label: "Network Response",
-        category: "Network",
-        description: "Send the final HTTP response back to the client and close the connection.",
-        defaultConfig: {
-            statusCode: 200,
-            headers: {
-                "Content-Type": "application/json",
-                "X-Powered-By": "Lazarus-Engine"
-            },
-            body: {
-                success: true,
-                message: "Workflow executed successfully",
-                data: ""
-            },
-            sourceNodeId: "",
-            attachContext: false,
-            options: {
-                minify: false,
-                includeTraceId: true,
-                errorOnEmpty: false,
-            }
-        },
-    },
-
-    {
-        key: "context",
-        type: "contextNode",
-        label: "Aggregate Context",
-        category: "Data",
-        description: "Map multiple node outputs into a single structured object.",
-        defaultConfig: {
-            label: "Final Payload",
-            fields: {
-                "status": "success",
-                "result": "{{last_node.output}}"
-            },
-        },
-    },
-];
-
-export const HTTP_METHODS = [
-    { label: "GET", value: "GET" },
-    { label: "POST", value: "POST" }
-]
-
 
 export interface IntegrationAction {
     id: string;
@@ -386,7 +203,6 @@ export type FloatingItem = {
 
 export const DATA: Record<SectionType, FloatingItem[]> = {
     intro: [],
-    any: [],
     features: [
         {
             title: "Execution Engine",

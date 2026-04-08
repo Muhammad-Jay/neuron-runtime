@@ -1,38 +1,51 @@
 "use client";
 
-import { Node } from "reactflow"
-import { useWorkflowEditor } from "@/hooks/workflow/useWorkflowEditor"
+import React, { memo, useEffect, useState } from "react";
+import { Node } from "reactflow";
+import { useWorkflowEditor } from "@/hooks/workflow/useWorkflowEditor";
+import { WorkflowEditorActionType } from "@/constants";
+import { DebugNodeConfig } from "@neuron/shared";
 
-import { Input } from "@/components/ui/input"
-import { SheetWrapper } from "@/components/workflow/editor/SheetWrapper"
-import { Textarea } from "@/components/ui/textarea"
-import {WorkflowEditorActionType} from "@/constants";
-import {debounce} from "lodash";
+import { Input } from "@/components/ui/input";
+import { SheetWrapper } from "@/components/workflow/editor/SheetWrapper";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
-export function DebugNodeConfigSheet({ node, open, onOpen }: { node: Node, open: boolean, onOpen: (open: boolean) => void }) {
+function DebugConfigSheet({
+                              node,
+                              open,
+                              onOpen,
+                          }: {
+    node: Node;
+    open: boolean;
+    onOpen: (open: boolean) => void;
+}) {
+    const { workflowEditorDispatch } = useWorkflowEditor();
 
-    const { workflowEditorDispatch } = useWorkflowEditor()
-    const config = node.data
+    // 1. Initialize local state from node config (following your schema)
+    const [config, setConfig] = useState<DebugNodeConfig>({
+        message: node.data?.message || "",
+        ...node.data,
+    });
 
-    const updateConfig = (partial: Partial<typeof config>) => {
-        debounce(() => {
+    // 2. Debounced sync to global workflow state
+    useEffect(() => {
+        const hasChanged = JSON.stringify(config) !== JSON.stringify(node.data);
+        if (!hasChanged) return;
+
+        const timer = setTimeout(() => {
             workflowEditorDispatch({
                 type: WorkflowEditorActionType.UPDATE_NODE,
                 id: node.id,
-                payload: {
-                    ...config,
-                    ...partial
-                }
-            })
-        }, 1000)
-    }
+                payload: config,
+            });
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [config, node.id, workflowEditorDispatch]);
 
     const handleChange = (key: string, value: any) => {
-        workflowEditorDispatch({
-            type: WorkflowEditorActionType.UPDATE_NODE,
-            id: node.id,
-            payload: { ...node.data, [key]: value }
-        })
+        setConfig((prev) => ({ ...prev, [key]: value }));
     };
 
     return (
@@ -40,51 +53,60 @@ export function DebugNodeConfigSheet({ node, open, onOpen }: { node: Node, open:
             nodeId={node.id}
             open={open}
             onOpenChange={onOpen}
-            nodeMeta={node.data?.meta}
+            nodeMeta={config.meta}
             onMetaUpdate={handleChange}
-            title="Debug Node">
+            executionConfig={config.executionConfig}
+            onExecutionConfigUpdate={(newExec) => handleChange('executionConfig', newExec)}
+            className="w-[550px]! h-full! p-0! bg-neutral-950/95 backdrop-blur-xl border-l border-neutral-800"
+            title="Debug Configuration"
+        >
+            <div className="space-y-6 p-2 mt-6">
+                <div className="p-4 rounded-xl bg-neutral-900/40 border border-neutral-800/50 backdrop-blur-sm space-y-5">
+                    <p className="text-[10px] text-neutral-500 uppercase font-bold tracking-tight mb-1">
+                        Log Payload
+                    </p>
 
-            <div className="space-y-5 mt-4">
+                    {/* MESSAGE / CONTENT */}
+                    <div className="space-y-2">
+                        <Label className="text-[11px] text-neutral-400 uppercase font-bold tracking-wider">
+                            Debug Message
+                        </Label>
+                        <Textarea
+                            value={config.message}
+                            onChange={(e) => handleChange("message", e.target.value)}
+                            placeholder="Enter message or use {{variable}}..."
+                            className="min-h-[120px] text-[11px] bg-neutral-950 border-neutral-800 text-white focus:border-primary/50 focus:ring-0 rounded-xl transition-all resize-none font-mono"
+                        />
+                    </div>
 
-                {/* NAME */}
-                <div className="flex flex-col gap-1">
-                    <label className="text-xs font-medium">Name</label>
-                    <Input
-                        value={config.name ?? ""}
-                        onChange={(e) => updateConfig({ name: e.target.value })}
-                        placeholder="Debug Node Name"
-                        className="text-xs h-8"
-                    />
+                    {/* LOG LEVEL - Based on your common debug patterns */}
+                    <div className="space-y-2">
+                        <Label className="text-[11px] text-neutral-400 uppercase font-bold tracking-wider">
+                            Severity Level
+                        </Label>
+                        <select
+                            value={"info"}
+                            onChange={(e) => handleChange("logLevel", e.target.value)}
+                            className="w-full h-10 text-[11px] bg-neutral-950 border border-neutral-800 text-white rounded-xl px-3 focus:border-primary/50 outline-none appearance-none cursor-pointer transition-all"
+                        >
+                            <option value="debug">DEBUG</option>
+                            <option value="info">INFO</option>
+                            <option value="warn">WARNING</option>
+                            <option value="error">ERROR</option>
+                        </select>
+                    </div>
                 </div>
 
-                {/* DESCRIPTION */}
-                <div className="flex flex-col gap-1">
-                    <label className="text-xs font-medium">Description</label>
-                    <Textarea
-                        value={config.description ?? ""}
-                        onChange={(e) => updateConfig({ description: e.target.value })}
-                        placeholder="Optional description..."
-                        className="text-xs"
-                    />
+                {/* HELPER TEXT */}
+                <div className="px-1 flex items-start gap-2">
+                    <div className="mt-1 w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" />
+                    <p className="text-[10px] text-neutral-500 leading-relaxed">
+                        Debug nodes output data to the <b>Execution Logs</b> without affecting downstream production logic.
+                    </p>
                 </div>
-
-                {/* LOG LEVEL */}
-                <div className="flex flex-col gap-1">
-                    <label className="text-xs font-medium">Log Level</label>
-                    <select
-                        value={config.logLevel ?? "info"}
-                        onChange={(e) => updateConfig({ logLevel: e.target.value })}
-                        className="h-8 text-xs border rounded-md px-2"
-                    >
-                        <option value="debug">Debug</option>
-                        <option value="info">Info</option>
-                        <option value="warn">Warn</option>
-                        <option value="error">Error</option>
-                    </select>
-                </div>
-
             </div>
-
         </SheetWrapper>
-    )
+    );
 }
+
+export const DebugNodeConfigSheet = memo(DebugConfigSheet);

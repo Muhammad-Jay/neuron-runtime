@@ -21,6 +21,7 @@ import {
 import { ExecutionDataInspector } from "./ExecutionDataInspector";
 import {memo, useMemo} from "react";
 import {ExecutionLog} from "@/types";
+import {nanoid} from "nanoid";
 
 const nodeIconMap: Record<string, any> = {
     webhook: Zap,
@@ -52,9 +53,9 @@ function Logs({ logs, title }: { logs: Record<string, ExecutionLog>, title?: str
 
                     return (
                         <AccordionItem
-                            key={log.id}
+                            key={log.id ?? nanoid()}
                             value={log.id}
-                            className="border border-neutral-800 bg-neutral-900/40 rounded-xl overflow-hidden px-0 transition-all data-[state=open]:border-white/20 data-[state=open]:bg-white/[0.02]"
+                            className="border border-neutral-800 bg-neutral-900/40 data-[state=open]:border-white/20 data-[state=open]:bg-white/[0.02]  rounded-xl overflow-hidden px-0 transition-all"
                         >
                             <AccordionTrigger className="hover:no-underline px-4 py-4 group transition-all">
                                 <div className="flex items-center gap-4 w-full text-left">

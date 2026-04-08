@@ -1,25 +1,22 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { Node } from "reactflow";
 import {
     Brain,
     ShieldCheck,
     Settings2,
     Sparkles,
-    Terminal,
     Scale,
     Info,
     Braces,
-    ExternalLink,
-    Zap, Maximize2, Cpu
+    ExternalLink
 } from "lucide-react";
 
 import { useWorkflowEditor } from "@/hooks/workflow/useWorkflowEditor";
 import { WorkflowEditorActionType } from "@/constants";
 import { SheetWrapper } from "@/components/workflow/editor/SheetWrapper";
 import { getAvailableUpstreamNodes } from "@/lib/utils";
-import { TemplateTextarea } from "@/components/workflow/editor/TemplateTextarea";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -32,13 +29,9 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import { Dialog, DialogContent, DialogHeader, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
-import {Button} from "@/components/ui/button";
-import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
-import {PromptOrchestrator} from "@/components/workflow/editor/sheet/PromptOrchestrator";
-import {LLMNodeConfig} from "@neuron/shared";
-import {SchemaDialog} from "@/components/workflow/editor/dialog/SchemaDialog";
+import { PromptOrchestrator } from "@/components/workflow/editor/sheet/PromptOrchestrator";
+import { LLMNodeConfig } from "@neuron/shared";
+import { SchemaDialog } from "@/components/workflow/editor/dialog/SchemaDialog";
 
 const LLM_PROVIDERS = [
     { label: "OpenAI", value: "openai", icon: "🟢" },
@@ -64,17 +57,17 @@ const LLM_MODELS: Record<string, { label: string; value: string }[]> = {
     ]
 };
 
-export function LLMNodeConfigSheet({ node, open, onOpen }: { node: Node, open: boolean, onOpen: (open: boolean) => void }) {
-    const { workflowEditorDispatch, editorState: { graph: { nodes, edges }} } = useWorkflowEditor();
+function LLMConfigSheet({ node, open, onOpen }: { node: Node, open: boolean, onOpen: (open: boolean) => void }) {
+    const { workflowEditorDispatch, editorState: { graph: { nodes, edges } } } = useWorkflowEditor();
 
-    const [provider, setProvider] = useState<string>(node.data?.provider ?? "openai");
+    // 1. Initialize local state from node config
     const [config, setConfig] = useState<LLMNodeConfig>({
-        provider: node.data?.provider ?? "openai",
+        provider: "openai",
         model: "gpt-4o",
         systemPrompt: "",
         userPrompt: "",
         temperature: 0.7,
-        outputSchema: node.data?.outputSchema ?? "",
+        outputSchema: "",
         maxTokens: 2048,
         jsonMode: false,
         apiKey: "{{Vault.OPENAI_API_KEY}}",
@@ -83,7 +76,11 @@ export function LLMNodeConfigSheet({ node, open, onOpen }: { node: Node, open: b
 
     const availableVariables = getAvailableUpstreamNodes(node.id, { nodes, edges });
 
+    // 2. Debounced sync to global workflow state
     useEffect(() => {
+        const hasChanged = JSON.stringify(config) !== JSON.stringify(node.data);
+        if (!hasChanged) return;
+
         const timer = setTimeout(() => {
             workflowEditorDispatch({
                 type: WorkflowEditorActionType.UPDATE_NODE,
@@ -99,7 +96,6 @@ export function LLMNodeConfigSheet({ node, open, onOpen }: { node: Node, open: b
     };
 
     const handleProviderChange = (val: string) => {
-        setProvider(val);
         setConfig(prev => ({
             ...prev,
             provider: val,
@@ -114,11 +110,12 @@ export function LLMNodeConfigSheet({ node, open, onOpen }: { node: Node, open: b
             nodeId={node.id}
             nodeMeta={config?.meta}
             onMetaUpdate={handleChange}
+            executionConfig={config.executionConfig}
+            onExecutionConfigUpdate={(newExec) => handleChange('executionConfig', newExec)}
             title="AI Brain Configuration"
             className="w-[550px]! p-0! bg-neutral-950/95 backdrop-blur-2xl border-l border-neutral-800"
         >
             <div className="flex flex-col h-full overflow-hidden">
-
                 {/* STATUS SUB-HEADER */}
                 <div className="flex items-center justify-between px-6 py-3 bg-neutral-900/40 border-b border-neutral-800/50">
                     <div className="flex items-center gap-4">
@@ -134,8 +131,7 @@ export function LLMNodeConfigSheet({ node, open, onOpen }: { node: Node, open: b
 
                 <ScrollArea className="flex-1">
                     <div className="p-6 space-y-8">
-
-                        {/* SECTION 1: SYSTEM TOPOLOGY (Provider & Model) */}
+                        {/* SECTION 1: SYSTEM TOPOLOGY */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-2 mb-2">
                                 <div className="p-1.5 bg-blue-500/10 rounded-md">
@@ -147,7 +143,7 @@ export function LLMNodeConfigSheet({ node, open, onOpen }: { node: Node, open: b
                             <div className="grid grid-cols-2 gap-4 bg-neutral-900/20 p-4 rounded-xl border border-neutral-800/50">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-semibold text-neutral-500 ml-1">AI Provider</label>
-                                    <Select value={provider} onValueChange={handleProviderChange}>
+                                    <Select value={config.provider} onValueChange={handleProviderChange}>
                                         <SelectTrigger className="bg-neutral-900/50 border-neutral-800 text-xs h-9 focus:ring-blue-500/50">
                                             <SelectValue />
                                         </SelectTrigger>
@@ -168,7 +164,7 @@ export function LLMNodeConfigSheet({ node, open, onOpen }: { node: Node, open: b
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent className="bg-neutral-950 border-neutral-800">
-                                            {LLM_MODELS[provider]?.map((m) => (
+                                            {LLM_MODELS[config.provider]?.map((m) => (
                                                 <SelectItem key={m.value} value={m.value} className="text-xs">{m.label}</SelectItem>
                                             ))}
                                         </SelectContent>
@@ -189,7 +185,7 @@ export function LLMNodeConfigSheet({ node, open, onOpen }: { node: Node, open: b
                             </div>
                         </div>
 
-                        {/* SECTION 2: HYPERPARAMETERS (Temp, Tokens, JSON) */}
+                        {/* SECTION 2: HYPERPARAMETERS */}
                         <div className="space-y-4 pt-4 border-t border-neutral-900">
                             <div className="flex items-center gap-2 mb-2">
                                 <div className="p-1.5 bg-amber-500/10 rounded-md">
@@ -199,7 +195,6 @@ export function LLMNodeConfigSheet({ node, open, onOpen }: { node: Node, open: b
                             </div>
 
                             <div className="space-y-6 bg-neutral-900/20 p-4 rounded-xl border border-neutral-800/50">
-                                {/* Temperature */}
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center px-1">
                                         <label className="text-[10px] font-bold text-neutral-400">Temperature</label>
@@ -246,21 +241,19 @@ export function LLMNodeConfigSheet({ node, open, onOpen }: { node: Node, open: b
                                     </div>
                                 </div>
 
-                                {/* Conditional Schema Builder */}
                                 {config.jsonMode && (
-                                    <SchemaDialog value={config.outputSchema ?? ""} onChange={handleChange}/>
+                                    <SchemaDialog value={config.outputSchema ?? ""} onChange={(val) => handleChange("outputSchema", val)}/>
                                 )}
                             </div>
                         </div>
 
-                        {/* SECTION: PROMPT MODAL TRIGGER */}
+                        {/* SECTION 3: PROMPT ORCHESTRATOR */}
                         <div className="space-y-4 pt-4 border-t border-neutral-900">
                             <div className="flex items-center gap-2 mb-2 px-1">
                                 <Sparkles className="w-3.5 h-3.5 text-white" />
                                 <h4 className="text-[11px] font-bold uppercase tracking-widest text-neutral-200">Execution Logic</h4>
                             </div>
 
-                            {/* Using the new component */}
                             <PromptOrchestrator
                                 systemPrompt={config.systemPrompt}
                                 userPrompt={config.userPrompt}
@@ -287,23 +280,9 @@ export function LLMNodeConfigSheet({ node, open, onOpen }: { node: Node, open: b
                         </div>
                     </div>
                 </ScrollArea>
-
-                {/*/!* BOTTOM ACTION BUTTONS *!/*/}
-                {/*<div className="p-4 bg-neutral-900/40 border-t border-neutral-800 flex items-center justify-between">*/}
-                {/*    <button className="text-[10px] text-neutral-500 hover:text-neutral-300 font-medium transition-colors">*/}
-                {/*        Restore Model Defaults*/}
-                {/*    </button>*/}
-                {/*    <div className="flex items-center gap-3">*/}
-                {/*        <span className="text-[9px] text-neutral-600 flex items-center gap-1 italic">*/}
-                {/*            Running auto-evaluation*/}
-                {/*        </span>*/}
-                {/*        /!* ACCENT WHITE BUTTONS *!/*/}
-                {/*        <button className="h-9 px-4 bg-white text-black text-xs font-bold rounded-lg hover:bg-neutral-200 transition-colors flex items-center gap-2">*/}
-                {/*            <Zap className="w-3.5 h-3.5 fill-black" /> Evaluate Unit*/}
-                {/*        </button>*/}
-                {/*    </div>*/}
-                {/*</div>*/}
             </div>
         </SheetWrapper>
     );
 }
+
+export const LLMNodeConfigSheet = memo(LLMConfigSheet);

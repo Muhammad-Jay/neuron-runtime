@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { Node } from "reactflow";
 import {
     Code2,
@@ -8,8 +8,7 @@ import {
     Zap,
     Info,
     Terminal,
-    Layers,
-    ChevronRight
+    Layers
 } from "lucide-react";
 
 import { useWorkflowEditor } from "@/hooks/workflow/useWorkflowEditor";
@@ -23,27 +22,30 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-export function TransformNodeConfigSheet({
-                                             node,
-                                             open,
-                                             onOpen
-                                         }: {
+function TransformConfigSheet({
+                                  node,
+                                  open,
+                                  onOpen
+                              }: {
     node: Node,
     open: boolean,
     onOpen?: (open: boolean) => void
 }) {
     const { workflowEditorDispatch, editorState: { graph: { nodes, edges }} } = useWorkflowEditor();
 
-    // 1. Initialize local state
+    // 1. Initialize local state with full schema spread
     const [config, setConfig] = useState<TransformNodeConfig>({
+        code: "// Access upstream data via the 'inputs' object\nreturn inputs;",
         ...node.data,
-        code: node.data?.code || "// Access upstream data via the 'inputs' object\nreturn inputs;",
     });
 
     const availableVariables = getAvailableUpstreamNodes(node.id, { nodes, edges });
 
-    // 2. Debounced sync to global state
+    // 2. Debounced sync to global state with change detection
     useEffect(() => {
+        const hasChanged = JSON.stringify(config) !== JSON.stringify(node.data);
+        if (!hasChanged) return;
+
         const timer = setTimeout(() => {
             workflowEditorDispatch({
                 type: WorkflowEditorActionType.UPDATE_NODE,
@@ -53,14 +55,15 @@ export function TransformNodeConfigSheet({
         }, 300);
 
         return () => clearTimeout(timer);
-    }, [config, node.id, workflowEditorDispatch]);
+    }, [config, node.id, workflowEditorDispatch, node.data]);
 
-    const handleCodeChange = (value: string) => {
-        setConfig({ code: value });
-    };
-
+    // 3. Proper state update handlers
     const handleChange = (key: string, value: any) => {
         setConfig(prev => ({ ...prev, [key]: value }));
+    };
+
+    const handleCodeChange = (value: string) => {
+        setConfig(prev => ({ ...prev, code: value }));
     };
 
     return (
@@ -70,110 +73,98 @@ export function TransformNodeConfigSheet({
             nodeMeta={config?.meta}
             onMetaUpdate={handleChange}
             nodeId={node.id}
+            executionConfig={config.executionConfig}
+            onExecutionConfigUpdate={(newExec) => handleChange('executionConfig', newExec)}
+            title="Data Transformation"
             className="w-[600px]! h-full! p-0! bg-neutral-950/95 backdrop-blur-xl border-l border-neutral-800"
         >
             <div className="flex flex-col h-full">
-                {/* HEADER - Consistent with HTTP Node */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-900">
+                {/* HEADER SUB-INFO */}
+                <div className="flex items-center justify-between px-6 py-3 bg-neutral-900/40 border-b border-neutral-800/50">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-purple-500/10 rounded-lg">
-                            <Code2 className="w-4 h-4 text-purple-500" />
-                        </div>
-                        <div>
-                            <h3 className="text-sm font-bold text-neutral-200">Data Transformation</h3>
-                            <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-medium">Logic Engine</p>
+                        <div className="flex items-center gap-2">
+                            <Terminal className="w-3.5 h-3.5 text-neutral-500" />
+                            <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest">Logic Engine // Runtime</span>
                         </div>
                     </div>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onOpen?.(false)}
-                        className="h-8 w-8 text-neutral-500 hover:text-white"
-                    >
-                        <X className="w-4 h-4" />
-                    </Button>
+                    <Badge variant="outline" className="text-[9px] border-purple-500/20 text-purple-400 uppercase tracking-tighter bg-purple-500/5">
+                        Javascript V8 (Node 20)
+                    </Badge>
                 </div>
 
                 {/* CONTENT AREA */}
-                <div className="flex-1 flex flex-col min-h-0 px-6 py-4 space-y-4">
-
-                    {/* INFO STRIP */}
-                    <div className="flex items-center justify-between bg-neutral-900/40 border border-neutral-800 rounded-lg px-4 py-2 shrink-0">
-                        <div className="flex items-center gap-2">
-                            <Terminal className="w-3 h-3 text-neutral-500" />
-                            <span className="text-[10px] font-mono text-neutral-400">runtime: node-js-20</span>
-                        </div>
-                        <Badge variant="outline" className="text-[9px] bg-purple-500/5 text-primary border-primary uppercase tracking-tighter">
-                            Javascript V8
-                        </Badge>
-                    </div>
+                <div className="flex-1 flex flex-col min-h-0 px-6 py-6 space-y-6">
 
                     {/* EDITOR SECTION */}
-                    <div className="flex-1 flex flex-col min-h-0 space-y-2">
+                    <div className="flex-1 flex flex-col min-h-0 space-y-3">
                         <div className="flex items-center justify-between px-1 shrink-0">
                             <div className="flex items-center gap-2">
-                                <Zap className="w-3 h-3 text-yellow-500" />
-                                <label className="text-[10px] uppercase font-bold tracking-widest text-neutral-500">
-                                    Code Editor
+                                <div className="p-1 bg-yellow-500/10 rounded">
+                                    <Zap className="w-3 h-3 text-yellow-500" />
+                                </div>
+                                <label className="text-[10px] uppercase font-bold tracking-widest text-neutral-400">
+                                    Functional Logic
                                 </label>
                             </div>
                         </div>
 
-                        <div className="flex-1 rounded-md border border-neutral-950 p-3 bg-black overflow-hidden relative group">
+                        <div className="flex-1 rounded-xl border border-neutral-800 bg-black overflow-hidden relative group shadow-2xl">
                             <CodeEditor
                                 value={config.code}
                                 onChange={handleCodeChange}
                                 height="100%"
-                                className="border-none bg-transparent h-[400px]"
+                                className="border-none bg-transparent"
                             />
                         </div>
                     </div>
 
-                    {/* FOOTER / DOCS SECTION */}
-                    <div className="shrink-0 space-y-3 pt-2">
+                    {/* CONTEXT EXPLORER */}
+                    <div className="shrink-0 space-y-3">
                         <div className="flex items-center gap-2 px-1">
                             <Layers className="w-3 h-3 text-neutral-500" />
-                            <label className="text-[10px] uppercase font-bold tracking-widest text-neutral-500">
-                                Context Explorer
+                            <label className="text-[10px] uppercase font-bold tracking-widest text-neutral-400">
+                                Global Scope Explorer
                             </label>
                         </div>
 
-                        <ScrollArea className="h-62 rounded-xl border border-neutral-800 bg-neutral-900/20 p-4">
+                        <ScrollArea className="h-48 rounded-xl border border-neutral-800 bg-neutral-900/20 p-4">
                             <div className="space-y-4">
                                 {/* Global Variable Info */}
                                 <div className="space-y-1.5">
                                     <div className="flex items-center gap-2">
-                                        <code className="text-primary text-[11px] font-bold bg-purple-500/10 px-1.5 py-0.5 rounded border border-primary">
+                                        <code className="text-purple-400 text-[11px] font-bold bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/20">
                                             inputs
                                         </code>
-                                        <span className="text-[10px] text-neutral-400 font-medium">Global Object</span>
+                                        <span className="text-[10px] text-neutral-500 font-medium">Immutable Registry</span>
                                     </div>
                                     <p className="text-[10px] text-neutral-500 leading-relaxed italic">
-                                        Contains results from all connected parent nodes. Map them using
-                                        <span className="text-neutral-300"> inputs.node_id.output</span>.
+                                        Contains results from all parent nodes. Access values via
+                                        <span className="text-neutral-300 font-mono mx-1">inputs.node_id.output</span>.
                                     </p>
                                 </div>
 
                                 {/* Upstream Nodes List */}
-                                <div className="pt-2 border-t border-neutral-800/50">
-                                    <p className="text-[9px] uppercase font-bold text-neutral-600 mb-2">Connected Upstream</p>
+                                <div className="pt-3 border-t border-neutral-800/50">
+                                    <p className="text-[9px] uppercase font-bold text-neutral-600 mb-2">Resolved Dependencies</p>
                                     <div className="flex flex-wrap gap-2">
                                         {availableVariables.length > 0 ? availableVariables.map((v) => (
-                                            <div key={v.id} className="flex items-center gap-1.5 bg-neutral-950 border border-neutral-800 rounded px-2 py-1">
-                                                <div className="w-1 h-1 rounded-full bg-green-500" />
+                                            <div key={v.id} className="flex items-center gap-1.5 bg-neutral-950 border border-neutral-800/50 rounded-md px-2 py-1">
+                                                <div className="w-1 h-1 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                                                 <span className="text-[10px] font-mono text-neutral-400">{v.type || v.id}</span>
                                             </div>
                                         )) : (
-                                            <span className="text-[10px] text-neutral-700 italic">No upstream nodes connected</span>
+                                            <span className="text-[10px] text-neutral-700 italic">No upstream signals detected</span>
                                         )}
                                     </div>
                                 </div>
                             </div>
                         </ScrollArea>
 
-                        <div className="flex items-center gap-2 text-[10px] text-neutral-600 bg-neutral-950/50 p-2 rounded-lg border border-neutral-900">
-                            <Info className="w-3 h-3" />
-                            <span>Transformations run in an isolated sandbox. External network calls are disabled here.</span>
+                        <div className="flex items-start gap-3 text-[10px] text-neutral-500 bg-blue-500/5 p-3 rounded-xl border border-blue-500/10">
+                            <Info className="w-3.5 h-3.5 text-blue-500 mt-0.5" />
+                            <span className="leading-relaxed">
+                                <strong>Sandbox Isolation:</strong> Transformations run in a secure V8 isolate. External networking (fetch, axios) and filesystem access are restricted for security.
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -181,3 +172,5 @@ export function TransformNodeConfigSheet({
         </SheetWrapper>
     );
 }
+
+export const TransformNodeConfigSheet = memo(TransformConfigSheet);

@@ -15,6 +15,7 @@ interface DashboardContextType {
     loading: boolean;
     isLogsLoading: boolean;
     refresh: () => Promise<void>;
+    currentExecId: string;
     logs: Record<string, ExecutionLog>;
     getExecutionLogs: (executionId: string) => Promise<Record<string, ExecutionLog>>;
 }
@@ -24,6 +25,7 @@ export const DashboardContext = createContext<DashboardContextType | undefined>(
 export function DashboardProvider({ children }: { children: React.ReactNode }) {
     const [metrics, setMetrics] = useState<any>(null);
     const [executions, setExecutions] = useState<Execution[]>([]);
+    const [currentExecId, setCurrentExecId] = useState("");
     const [logs, setLogs] = useState<Record<string, ExecutionLog>>({});
     const [loading, setLoading] = useState(true);
     const [isLogsLoading, setIsLogsLoading] = useState(false);
@@ -52,6 +54,14 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
 
             setMetrics(metricsRes);
             setExecutions(executionsRes);
+
+            if(executionsRes){
+                const lastExecId = executionsRes[0]?.id ?? null;
+
+                if (lastExecId) {
+                    await getExecutionLogs(lastExecId);
+                }
+            }
         } catch (error) {
             console.error("Dashboard Intelligence Sync Failed:", error);
         } finally {
@@ -63,6 +73,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         try{
             setIsLogsLoading(true);
 
+            setCurrentExecId(executionId);
             const token = await getToken();
 
             const data = await getExecutionsLogsRequest(executionId, token)
@@ -105,6 +116,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         isLogsLoading,
         refresh: fetchDashboardData,
         getExecutionLogs,
+        currentExecId,
     }), [
         metrics,
         executions,
@@ -112,7 +124,8 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         loading,
         isLogsLoading,
         fetchDashboardData,
-        getExecutionLogs
+        getExecutionLogs,
+        currentExecId
     ]);
 
     return (

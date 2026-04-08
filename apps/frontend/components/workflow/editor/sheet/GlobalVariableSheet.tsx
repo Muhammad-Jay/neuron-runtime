@@ -65,7 +65,7 @@ function GlobalVariables() {
         };
 
         const nextVars = { ...variables, [formattedKey]: newVariable };
-        workflowEditorDispatch({ type: WorkflowEditorActionType.UPDATE_GLOBAL_VARS, payload: nextVars });
+        debouncedDispatch(nextVars);
         setDraft({ key: "", value: "" });
     };
 
@@ -82,7 +82,7 @@ function GlobalVariables() {
     const handleDelete = (key: string) => {
         const nextVars = { ...variables };
         delete nextVars[key];
-        workflowEditorDispatch({ type: WorkflowEditorActionType.UPDATE_GLOBAL_VARS, payload: nextVars });
+        debouncedDispatch(nextVars);
     };
 
     const copyToClipboard = (key: string) => {

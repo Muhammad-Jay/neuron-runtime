@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { Node } from "reactflow";
 import {
     Globe,
@@ -22,31 +22,30 @@ import { TemplateTextarea } from "@/components/workflow/editor/TemplateTextarea"
 import { HeadersEditor } from "./HeaderEditor";
 import FormField from "@/components/FormField";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card } from "@/components/ui/card";
 import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger
 } from "@/components/ui/collapsible";
-import { Button } from "@/components/ui/button";
-import {Label} from "@/components/ui/label";
 
-export function HttpRequestNodeConfigSheet({
-                                               node,
-                                               open,
-                                               onOpen
-                                           }: {
+function HttpRequestConfigSheet({
+                                    node,
+                                    open,
+                                    onOpen
+                                }: {
     node: Node,
     open: boolean,
     onOpen?: (open: boolean) => void
 }) {
-    const { workflowEditorDispatch, editorState: { graph: { nodes, edges }} } = useWorkflowEditor();
+    const { workflowEditorDispatch, editorState: { graph: { nodes, edges } } } = useWorkflowEditor();
 
-    // Internal state for snappy UI feedback
+    // 1. Initialize local state from node config using Schema types
     const [config, setConfig] = useState<HttpRequestNodeConfig>({
-        ...node.data,
+        url: node.data?.url || "",
+        method: node.data?.method || "GET",
         headers: node.data?.headers || {},
-        body: node.data?.body || {}
+        body: node.data?.body || {},
+        ...node.data
     });
 
     const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -56,16 +55,19 @@ export function HttpRequestNodeConfigSheet({
 
     const availableVariables = getAvailableUpstreamNodes(node.id, { nodes, edges });
 
-    // Debounced update to the global workflow state
+    // 2. Optimized Debounced Sync (The Fix)
     useEffect(() => {
+        const hasChanged = JSON.stringify(config) !== JSON.stringify(node.data);
+        if (!hasChanged) return;
+
         const timer = setTimeout(() => {
-            console.log("saving config: ", config);
             workflowEditorDispatch({
                 type: WorkflowEditorActionType.UPDATE_NODE,
                 id: node.id,
                 payload: config
             });
         }, 300);
+
         return () => clearTimeout(timer);
     }, [config, node.id, workflowEditorDispatch]);
 
@@ -83,12 +85,13 @@ export function HttpRequestNodeConfigSheet({
             onOpenChange={onOpen}
             nodeId={node.id}
             nodeMeta={config.meta}
+            executionConfig={config.executionConfig}
+            onExecutionConfigUpdate={(newExec) => handleChange('executionConfig', newExec)}
             onMetaUpdate={handleChange}
-
             className="w-[550px]! h-full! p-0! bg-neutral-950/95 backdrop-blur-xl border-l border-neutral-800"
         >
             <div className="flex flex-col h-full">
-                {/* HEADER - Consistent with Decision Node */}
+                {/* HEADER */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-900">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-blue-500/10 rounded-lg">
@@ -99,18 +102,12 @@ export function HttpRequestNodeConfigSheet({
                             <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-medium">Network Connector</p>
                         </div>
                     </div>
-                    <div
-
-                        className="h-8 w-8 text-neutral-500 hover:text-white"
-                    >
-
-                    </div>
+                    <div className="h-8 w-8 text-neutral-500 hover:text-white"></div>
                 </div>
 
                 {/* CONTENT */}
                 <div className="flex-1 flex flex-col min-h-0 px-4 py-4 space-y-6">
-
-                    {/* PINNED PRIMARY CONFIG (METHOD & URL) */}
+                    {/* PRIMARY CONFIG (METHOD & URL) */}
                     <section className="space-y-4 shrink-0">
                         <div className="flex w-full flex-col gap-5">
                             <div className="flex items-start! justify-start flex-row w-full gap-3">
@@ -137,7 +134,7 @@ export function HttpRequestNodeConfigSheet({
                         </div>
                     </section>
 
-                    {/* SCROLLABLE CONFIG AREA (HEADERS & BODY) */}
+                    {/* SCROLLABLE CONFIG AREA */}
                     <section className="flex-1 flex flex-col min-h-0 space-y-4">
                         <div className="flex items-center gap-2 px-1 shrink-0">
                             <Settings2 className="w-3 h-3 text-neutral-500" />
@@ -148,7 +145,6 @@ export function HttpRequestNodeConfigSheet({
 
                         <ScrollArea className="flex-1 pr-4 -mr-4">
                             <div className="space-y-4 pb-8">
-
                                 {/* HEADERS COLLAPSIBLE */}
                                 <Collapsible
                                     open={openSections.headers}
@@ -178,7 +174,7 @@ export function HttpRequestNodeConfigSheet({
                                     </CollapsibleContent>
                                 </Collapsible>
 
-                                {/* BODY COLLAPSIBLE (Only if not GET) */}
+                                {/* BODY COLLAPSIBLE */}
                                 {config.method !== "GET" && (
                                     <Collapsible
                                         open={openSections.body}
@@ -215,7 +211,6 @@ export function HttpRequestNodeConfigSheet({
                                     </div>
                                     <span className="text-[9px] text-neutral-700 font-mono italic">Coming Soon</span>
                                 </div>
-
                             </div>
                         </ScrollArea>
                     </section>
@@ -224,3 +219,5 @@ export function HttpRequestNodeConfigSheet({
         </SheetWrapper>
     );
 }
+
+export const HttpRequestNodeConfigSheet = memo(HttpRequestConfigSheet);

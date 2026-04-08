@@ -51,7 +51,7 @@ export function HeroOverlay({ section }: { section: SectionType }) {
                             duration: 1.4,
                             ease: [0.19, 1, 0.22, 1]
                         }}
-                        className="pb-2 text-6xl md:text-8xl font-medium tracking-tighter bg-gradient-to-b from-foreground via-foreground/90 to-foreground/40 bg-clip-text text-transparent"
+                        className="pb-2 text-6xl md:text-7xl font-medium tracking-tighter bg-gradient-to-b from-foreground via-foreground/90 to-foreground/40 bg-clip-text text-transparent"
                     >
                         {label}
                     </motion.h1>

@@ -2,8 +2,11 @@ import { Play, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWorkflowEditor } from "@/hooks/workflow/useWorkflowEditor";
 import { PanelWrapper } from "@/components/workflow/editor/Panel/PanelWrapper";
+import {useValidation} from "@/hooks/useValidation";
+import {cn} from "@/lib/utils";
 
 export function EditorTopMenu() {
+    const { isValid } = useValidation();
     const {
         editorState,
         handleRunWorkflow,
@@ -30,11 +33,13 @@ export function EditorTopMenu() {
                         Execute
                     </Button>
                     <Button
+                        disabled={!isValid}
                         onClick={() => setIsDeployWorkflowDialogOpen(true)}
-                        className="h-full px-5 gap-2 text-xs font-bold uppercase tracking-wider bg-white text-black hover:bg-neutral-200 rounded-xl shadow-lg transition-transform active:scale-95"
+                        className={cn("h-full px-5 gap-2 text-xs font-bold uppercase tracking-wider bg-white text-black hover:bg-neutral-200 rounded-xl shadow-lg transition-transform active:scale-95",
+                            !isValid && "opacity-50 grayscale")}
                     >
                         <Rocket size={14} />
-                        Publish
+                        {isValid ? "Deploy" : "Fix Errors to Deploy"}
                     </Button>
                 </div>
             </div>

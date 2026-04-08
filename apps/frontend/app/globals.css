@@ -178,6 +178,22 @@
     }
 }
 
+@keyframes neuralFlow {
+    from {
+        offset-distance: 0%;
+    }
+    to {
+        offset-distance: 100%;
+    }
+}
+
+.animate-neural-flow {
+    /* This ensures the browser knows to treat the path as a motion coordinate */
+    offset-path: path("M 60 40 C 60 120, 290 120, 290 200 S 60 280, 60 360 S 290 440, 290 520 S 60 600, 60 640");
+    offset-rotate: auto;
+    animation: neuralFlow 25s linear infinite;
+}
+
 #hide-scrollbar {
     /* For Internet Explorer and Edge */
     -ms-overflow-style: none !important;

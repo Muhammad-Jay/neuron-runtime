@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { Node } from "reactflow";
 import {
     MessageSquare,
@@ -32,23 +32,39 @@ import { getAvailableUpstreamNodes } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { IntegrationNodeConfig } from "@neuron/shared";
 
-export function IntegrationNodeConfigSheet({ node, open, onOpen }: { node: Node; open: boolean; onOpen: (o: boolean) => void }) {
+function IntegrationConfigSheet({
+                                    node,
+                                    open,
+                                    onOpen
+                                }: {
+    node: Node;
+    open: boolean;
+    onOpen: (o: boolean) => void
+}) {
     const { workflowEditorDispatch, editorState: { graph: { nodes, edges }} } = useWorkflowEditor();
 
     const availableVariables = getAvailableUpstreamNodes(node.id, { nodes, edges });
 
-    const [config, setConfig] = useState(node.data || {
-        integrationId: "slack",
-        connectionId: "",
-        actionId: "postMessage",
-        parameters: {},
+    // 1. Initialize local state from node data with Schema types
+    const [config, setConfig] = useState<IntegrationNodeConfig>({
+        integrationId: node.data?.integrationId || "slack",
+        connectionId: node.data?.connectionId || "",
+        action: node.data?.action || "postMessage",
+        parameters: node.data?.parameters || {},
+        ...node.data
     });
 
     const manifest = INTEGRATION_MANIFEST[config.integrationId];
-    const currentAction = manifest?.actions.find(a => a.id === config.actionId);
+    // Note: Mapping your actionId from UI to action in the config schema
+    const currentAction = manifest?.actions.find(a => a.id === config.action);
 
+    // 2. Debounced sync to global workflow state
     useEffect(() => {
+        const hasChanged = JSON.stringify(config) !== JSON.stringify(node.data);
+        if (!hasChanged) return;
+
         const timer = setTimeout(() => {
             workflowEditorDispatch({
                 type: WorkflowEditorActionType.UPDATE_NODE,
@@ -59,6 +75,10 @@ export function IntegrationNodeConfigSheet({ node, open, onOpen }: { node: Node;
         return () => clearTimeout(timer);
     }, [config, node.id, workflowEditorDispatch]);
 
+    const handleChange = (key: string, value: any) => {
+        setConfig(prev => ({ ...prev, [key]: value }));
+    };
+
     const updateParam = (key: string, value: string) => {
         setConfig((prev: any) => ({
             ...prev,
@@ -66,12 +86,11 @@ export function IntegrationNodeConfigSheet({ node, open, onOpen }: { node: Node;
         }));
     };
 
-    const handleChange = (key: string, value: any) => {
-        workflowEditorDispatch({
-            type: WorkflowEditorActionType.UPDATE_NODE,
-            id: node.id,
-            payload: { ...node.data, meta: { ...node.data?.meta, [key]: value } }
-        })
+    const handleMetaUpdate = (key: string, value: any) => {
+        setConfig(prev => ({
+            ...prev,
+            meta: { ...prev.meta, [key]: value }
+        }));
     };
 
     return (
@@ -80,12 +99,13 @@ export function IntegrationNodeConfigSheet({ node, open, onOpen }: { node: Node;
             onOpenChange={onOpen}
             nodeId={node.id}
             nodeMeta={config?.meta}
-            onMetaUpdate={handleChange}
+            onMetaUpdate={handleMetaUpdate}
+            executionConfig={config.executionConfig}
+            onExecutionConfigUpdate={(newExec) => handleChange('executionConfig', newExec)}
             title={manifest?.label || 'Integration'}
             className="w-[550px]! p-0! bg-neutral-950/95 backdrop-blur-2xl border-l border-neutral-800"
         >
             <div className="flex flex-col h-full overflow-hidden">
-
                 {/* SUB-HEADER / STATUS BAR */}
                 <div className="flex items-center justify-between px-6 py-3 bg-neutral-900/40 border-b border-neutral-800/50">
                     <div className="flex items-center gap-4">
@@ -106,7 +126,6 @@ export function IntegrationNodeConfigSheet({ node, open, onOpen }: { node: Node;
 
                 <ScrollArea className="flex-1">
                     <div className="p-6 space-y-8">
-
                         {/* SECTION: INFRASTRUCTURE (Auth & Action) */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-2 mb-2">
@@ -121,7 +140,7 @@ export function IntegrationNodeConfigSheet({ node, open, onOpen }: { node: Node;
                                     <label className="text-[10px] font-semibold text-neutral-500 ml-1">Account Connection</label>
                                     <Select
                                         value={config.connectionId}
-                                        onValueChange={(val) => setConfig((p) => ({ ...p, connectionId: val }))}
+                                        onValueChange={(val) => handleChange("connectionId", val)}
                                     >
                                         <SelectTrigger className="bg-neutral-900/50 border-neutral-800 text-xs focus:ring-1 focus:ring-primary h-9">
                                             <div className="flex items-center gap-2">
@@ -139,8 +158,8 @@ export function IntegrationNodeConfigSheet({ node, open, onOpen }: { node: Node;
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-semibold text-neutral-500 ml-1">Target Action</label>
                                     <Select
-                                        value={config.actionId}
-                                        onValueChange={(val) => setConfig((p) => ({ ...p, actionId: val, parameters: {} }))}
+                                        value={config.action}
+                                        onValueChange={(val) => setConfig((p) => ({ ...p, action: val, parameters: {} }))}
                                     >
                                         <SelectTrigger className="bg-neutral-900/50 border-neutral-800 text-xs focus:ring-1 focus:ring-primary! h-9">
                                             <SelectValue />
@@ -227,7 +246,10 @@ export function IntegrationNodeConfigSheet({ node, open, onOpen }: { node: Node;
 
                 {/* ACTION FOOTER */}
                 <div className="p-4 bg-neutral-900/20 border-t border-neutral-800 flex items-center justify-between">
-                    <button className="text-[10px] text-neutral-500 hover:text-neutral-300 font-medium transition-colors">
+                    <button
+                        onClick={() => handleChange("parameters", {})}
+                        className="text-[10px] text-neutral-500 hover:text-neutral-300 font-medium transition-colors"
+                    >
                         Clear All Parameters
                     </button>
                     <div className="flex items-center gap-3">
@@ -240,3 +262,5 @@ export function IntegrationNodeConfigSheet({ node, open, onOpen }: { node: Node;
         </SheetWrapper>
     );
 }
+
+export const IntegrationNodeConfigSheet = memo(IntegrationConfigSheet);

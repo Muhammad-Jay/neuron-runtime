@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { memo, useState, useEffect, useMemo } from "react";
 import { Node } from "reactflow";
 import {
     Send,
@@ -10,9 +10,8 @@ import {
     Code2,
     Activity,
     Zap,
-    Layout,
     Database,
-    Infinity
+    Infinity, Layout
 } from "lucide-react";
 
 import { useWorkflowEditor } from "@/hooks/workflow/useWorkflowEditor";
@@ -26,17 +25,19 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
+import { RespondNodeConfig } from "@neuron/shared";
 
-export function RespondNodeConfigSheet({ node, open, onOpen }: { node: Node, open: boolean, onOpen: (open: boolean) => void }) {
+function RespondConfigSheet({ node, open, onOpen }: { node: Node, open: boolean, onOpen: (open: boolean) => void }) {
     const { workflowEditorDispatch, editorState } = useWorkflowEditor();
     const { nodes, edges } = editorState.graph;
 
-    // Detection logic for Context Node presence
+    // 1. Detect presence of Context Node
     const hasContextNode = useMemo(() =>
-            Object.entries(nodes).find(([id, n]) => n.type === 'contextNode'),
+            Object.values(nodes).some((n) => n.type === 'contextNode'),
         [nodes]);
 
-    const [config, setConfig] = useState({
+    // 2. Initialize local state from node data
+    const [config, setConfig] = useState<RespondNodeConfig>({
         statusCode: node.data?.statusCode ?? 200,
         headers: node.data?.headers ?? { "Content-Type": "application/json" },
         body: node.data?.body ?? "",
@@ -52,7 +53,11 @@ export function RespondNodeConfigSheet({ node, open, onOpen }: { node: Node, ope
 
     const availableVariables = getAvailableUpstreamNodes(node.id, { nodes, edges });
 
+    // 3. Debounced sync to global workflow state
     useEffect(() => {
+        const hasChanged = JSON.stringify(config) !== JSON.stringify(node.data);
+        if (!hasChanged) return;
+
         const timer = setTimeout(() => {
             workflowEditorDispatch({
                 type: WorkflowEditorActionType.UPDATE_NODE,
@@ -82,10 +87,11 @@ export function RespondNodeConfigSheet({ node, open, onOpen }: { node: Node, ope
             onMetaUpdate={handleChange}
             title="Terminal Response"
             showContextSettings={false}
+            executionConfig={config.executionConfig}
+            onExecutionConfigUpdate={(newExec) => handleChange('executionConfig', newExec)}
             className="w-[550px]! p-0! bg-neutral-950/95 backdrop-blur-3xl border-l border-neutral-900"
         >
             <div className="flex flex-col h-full overflow-hidden">
-
                 {/* STATUS SUB-HEADER */}
                 <div className="flex items-center justify-between px-6 py-3 bg-neutral-900/20 border-b border-neutral-800/40">
                     <div className="flex items-center gap-4">
@@ -101,17 +107,16 @@ export function RespondNodeConfigSheet({ node, open, onOpen }: { node: Node, ope
 
                 <ScrollArea className="flex-1">
                     <div className="p-6 px-3! space-y-8">
-
-                        {/* SECTION: CONTEXT INTEGRATION LAYER (Dynamic Appearance) */}
+                        {/* SECTION: CONTEXT INTEGRATION LAYER */}
                         {hasContextNode && (
                             <div
                                 onClick={() => handleChange("attachContext", !config.attachContext)}
                                 className={cn(
-                                "w-full border rounded-2xl p-5 transition-all duration-500 overflow-hidden relative",
-                                config.attachContext
-                                    ? "bg-emerald-500/[0.02] border-emerald-500/30 shadow-[0_0_25px_-12px_rgba(16,185,129,0.15)]"
-                                    : "bg-neutral-900/40 border-neutral-800"
-                            )}>
+                                    "w-full border rounded-2xl p-5 transition-all duration-500 overflow-hidden relative cursor-pointer",
+                                    config.attachContext
+                                        ? "bg-emerald-500/[0.02] border-emerald-500/30 shadow-[0_0_25px_-12px_rgba(16,185,129,0.15)]"
+                                        : "bg-neutral-900/40 border-neutral-800"
+                                )}>
                                 <div className="flex items-center justify-between relative z-10">
                                     <div className="flex items-center gap-4">
                                         <div className={cn(
@@ -190,7 +195,7 @@ export function RespondNodeConfigSheet({ node, open, onOpen }: { node: Node, ope
                                         <Badge variant="outline" className="text-[8px] border-neutral-800 text-neutral-600 tracking-tighter">REACTIVE_ENGINE_V1</Badge>
                                     </div>
                                     <TemplateTextarea
-                                        value={config.body}
+                                        value={config.body as string}
                                         onChange={(val) => handleChange("body", val)}
                                         variables={availableVariables}
                                         placeholder='{ "status": "resolved", "data": {{node.output}} }'
@@ -270,7 +275,10 @@ export function RespondNodeConfigSheet({ node, open, onOpen }: { node: Node, ope
 
                 {/* BOTTOM ACTION BUTTONS */}
                 <div className="p-6 bg-neutral-950/50 border-t border-neutral-900 flex items-center justify-between">
-                    <button className="text-[10px] text-neutral-600 hover:text-white font-bold uppercase tracking-widest transition-colors">
+                    <button
+                        onClick={() => handleChange("body", "")}
+                        className="text-[10px] text-neutral-600 hover:text-white font-bold uppercase tracking-widest transition-colors"
+                    >
                         Reset Schema
                     </button>
                     <div className="flex items-center gap-5">
@@ -287,3 +295,5 @@ export function RespondNodeConfigSheet({ node, open, onOpen }: { node: Node, ope
         </SheetWrapper>
     );
 }
+
+export const RespondNodeConfigSheet = memo(RespondConfigSheet);

@@ -11,8 +11,9 @@ import { Rocket, ArrowRight } from "lucide-react"
 import { useHeroBridge } from "@/hooks/use-hero-bridge"
 import {HeroBackground} from "@/components/layout/hero/background/HeroBackground";
 import {useRouter} from "next/navigation";
+import {Footer} from "@/components/layout/footer/Footer";
 
-const SECTIONS = ["intro", "any", "features", "capabilities", "demos"] as const
+const SECTIONS = ["intro", "features", "capabilities", "demos"] as const
 export type SectionType = typeof SECTIONS[number]
 
 export const HeroSection = memo(function HeroSection() {
@@ -28,7 +29,7 @@ export const HeroSection = memo(function HeroSection() {
     }, [])
 
     return (
-        <div ref={containerRef} className="relative h-[600vh]  text-white overflow-clip">
+        <div ref={containerRef} className="relative h-[500dvh]  text-white overflow-clip">
 
             {/* 1. THE ATMOSPHERE (Deepest Layer) */}
             <HeroBackground />
@@ -100,17 +101,6 @@ export const HeroSection = memo(function HeroSection() {
                         </div>
                     </motion.div>
                 </div>
-            </motion.div>
-
-            {/* LAYER 2: THE REVEALED KERNEL */}
-            <motion.div
-                style={transforms.reveal}
-                className="sticky top-0 h-screen w-full flex flex-col items-center justify-center z-10 bg-[#050505]"
-            >
-                <div className="absolute inset-0 opacity-[0.03]"
-                     style={{ backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`,
-                         backgroundSize: '50px 50px' }} />
-                <FabricReveal isActive={scrollYProgress.get() > 0.75} />
             </motion.div>
         </div>
     )

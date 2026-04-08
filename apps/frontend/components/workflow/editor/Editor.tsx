@@ -48,6 +48,7 @@ import {EditorTopMenu} from "@/components/workflow/editor/menu/EditorTopMenu";
 import {EditorLeftMenu} from "@/components/workflow/editor/menu/EditorLeftMenu";
 import {EditorRightMenu} from "@/components/workflow/editor/menu/EditorRightMenu";
 import {EditorBottomMenu} from "@/components/workflow/editor/menu/EditorBottomMenu";
+import {WorkflowInspector} from "@/components/workflow/editor/WorkflowInspector";
 
 // --------------------------------------------
 // Component
@@ -87,12 +88,7 @@ export function Editor() {
         setIsSheetOpen,
         sheetOpen,
         setSheetOpen,
-        setIsEditorPanelOpen,
         isWorkflowLoading,
-        setIsExecutionsSheetOpen,
-        handleRunWorkflow,
-        isRunning,
-        setIsGlobalVariableSheetOpen,
         isDeployWorkflowDialogOpen,
         setIsDeployWorkflowDialogOpen,
     } = useWorkflowEditor();
@@ -266,6 +262,7 @@ export function Editor() {
             <EditorBottomMenu />
 
             <NodesInspector/>
+            <WorkflowInspector/>
 
             {graphNodes.length === 0 && (
                 <Panel position="top-center" className={'container-fit canter top-[40%]!'}>
