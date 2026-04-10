@@ -1,25 +1,25 @@
 import type { NodeConfigType } from '@neuron/shared';
 import {
-  Slack,
-  Github,
-  Mail,
-  MessageSquare,
-  Database,
-  Calendar,
-  BarChart3,
-  Infinity,
-  Workflow,
-  Cpu,
-  Layers,
-  Terminal,
-  GitBranch,
-  Share2,
-  Zap,
-  Brain,
-  Shield,
-  GitMerge,
-  Activity,
-  Send,
+    Slack,
+    Github,
+    Mail,
+    MessageSquare,
+    Database,
+    Calendar,
+    BarChart3,
+    Infinity,
+    Workflow,
+    Cpu,
+    Layers,
+    Terminal,
+    GitBranch,
+    Share2,
+    Zap,
+    Brain,
+    Shield,
+    GitMerge,
+    Activity,
+    Send, LucideIcon,
 } from 'lucide-react';
 import { SectionType } from '@/components/layout/hero/HeroSection';
 
@@ -58,7 +58,7 @@ export interface IntegrationPlatform {
   id: string;
   name: string;
   description: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   category: 'Communication' | 'DevTools' | 'Productivity' | 'Data';
   authMethod: AuthMethod;
   color: string;

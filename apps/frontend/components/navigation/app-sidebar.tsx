@@ -2,20 +2,20 @@
 
 import * as React from 'react';
 import {
-  AudioWaveform,
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
-  Workflow,
-  LayoutDashboard,
-  Activity,
-  CalendarClock,
+    AudioWaveform,
+    BookOpen,
+    Bot,
+    Command,
+    Frame,
+    GalleryVerticalEnd,
+    Map,
+    PieChart,
+    Settings2,
+    SquareTerminal,
+    Workflow,
+    LayoutDashboard,
+    Activity,
+    CalendarClock, Zap, SaveIcon,
 } from 'lucide-react';
 
 import { NavMain } from '@/components/navigation/nav-main';
@@ -32,13 +32,7 @@ import {
 import { NavRoutes } from '@/components/navigation/nav-routes';
 import { useAuth } from '@/hooks/useAuth';
 
-// This is sample data.
 const data = {
-  user: {
-    name: 'shadcn',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
   routes: [
     {
       name: 'Dashboard',
@@ -56,20 +50,15 @@ const data = {
       icon: Activity,
     },
     {
-      name: 'Jobs',
-      href: '/dashboard/jobs',
+      name: 'Schedules',
+      href: '/dashboard/schedules',
       icon: CalendarClock,
-    },
-    {
-      name: 'Vault',
-      href: '/dashboard/vault',
-      icon: Activity,
     },
   ],
   teams: [
     {
       name: 'Neuron',
-      logo: GalleryVerticalEnd,
+      logo: Zap,
       plan: 'Orchestrator',
     },
     {
@@ -148,32 +137,31 @@ const data = {
     },
     {
       title: 'Settings',
-      url: '#',
+      url: '/dashboard/settings',
       icon: Settings2,
       items: [
         {
           title: 'General',
-          url: '#',
+          url: '/settings',
+            icon: Workflow,
         },
-        {
-          title: 'Team',
-          url: '#',
-        },
-        {
-          title: 'Billing',
-          url: '#',
-        },
-        {
-          title: 'Limits',
-          url: '#',
-        },
+          {
+              title: 'Integrations',
+              url: '/dashboard/settings/integrations',
+              icon: Zap,
+          },
+          {
+              title: 'Vault',
+              url: '/dashboard/settings/vault',
+              icon: SaveIcon,
+          },
       ],
     },
   ],
   projects: [
     {
       name: 'Design Engineering',
-      url: '#',
+      url: '/dashboard/settings',
       icon: Frame,
     },
     {

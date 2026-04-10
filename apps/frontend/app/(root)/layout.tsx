@@ -11,6 +11,7 @@ import {
 import { AppSidebar } from '@/components/navigation/app-sidebar';
 import { Separator } from '@/components/ui/separator';
 import { Provider } from '@/app/(root)/Provider';
+import {ShellHeader} from "@/components/navigation/shell-header";
 
 export default function RootLayout({
   children,
@@ -21,28 +22,7 @@ export default function RootLayout({
     <Provider>
       <AppSidebar />
       <SidebarInset>
-        <header className="sticky top-0 z-50! flex h-16 shrink-0 items-center gap-2 bg-black/90 backdrop-blur-2xl transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator
-              orientation="vertical"
-              className="mr-2 data-[orientation=vertical]:h-4"
-            />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    Build Your Application
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-        </header>
+          <ShellHeader />
         {children}
       </SidebarInset>
     </Provider>

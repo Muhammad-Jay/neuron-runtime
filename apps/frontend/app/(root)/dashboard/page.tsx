@@ -25,9 +25,6 @@ export default function DashboardPage() {
     <div className="flex min-h-screen flex-col gap-6 bg-black p-8 font-sans text-white">
       {/* Header: System Identity */}
       <header className="mb-2 flex flex-col gap-1">
-        <h1 className="text-xl font-bold tracking-tight">
-            Dashboard
-        </h1>
         <p className="flex items-center gap-2 text-xs text-neutral-500">
           <Zap size={12} className="text-primary fill-primary" />
           Real-time engine telemetry and process monitoring.
