@@ -69,10 +69,10 @@ export default function DynamicNode(node: NodeProps) {
                 <Card
                     onContextMenu={(e) => e.stopPropagation()}
                     className={cn(
-                        'group relative flex h-fit w-[200px] flex-col gap-1.5 rounded-xl border-0 bg-neutral-800/25 p-3 backdrop-blur-sm transition-all',
+                        'group relative flex h-fit w-[200px] flex-col gap-1.5 rounded-2xl border-0 bg-neutral-800/35 p-3 backdrop-blur-sm transition-all',
                         statusClass,
-                        selected && 'ring-primary! ring-2!',
                         nodeError && validationStyles,
+                        selected && 'border-neutral-700! border-3!',
                         node.type === 'contextNode' && 'w-[250px]'
                     )}
                 >
@@ -125,7 +125,8 @@ export default function DynamicNode(node: NodeProps) {
                     <Card
                         className={cn(
                             'container-full flex h-full flex-col rounded-xl border-0 p-2 transition',
-                            'bg-neutral-900/50 group-hover:bg-neutral-800'
+                            'bg-neutral-900/60 group-hover:bg-neutral-800'.
+                                selected && 'bg-neutral-700!',
                         )}
                     >
                         <CardContent className="flex flex-grow items-center justify-start gap-2.5 p-0">
@@ -154,7 +155,8 @@ export default function DynamicNode(node: NodeProps) {
                     <Card
                         className={cn(
                             'flex h-full flex-col rounded-xl border-0 p-2 transition',
-                            'bg-neutral-900/50 group-hover:bg-neutral-800',
+                            'bg-neutral-900/60 group-hover:bg-neutral-800',
+                            selected && 'bg-neutral-700!',
                             node.type === 'contextNode' && 'h-[100px]',
                             node.type === 'decisionNode' && 'h-[50px]',
                             (node.type === 'httpNode' || node.type === 'debug') && 'hidden'
@@ -171,6 +173,7 @@ export default function DynamicNode(node: NodeProps) {
                         className={cn(
                             'container-full flex h-full flex-col rounded-xl border-0 p-2 transition',
                             'bg-neutral-900/50 group-hover:bg-neutral-800',
+                            selected && 'bg-neutral-700!',
                             color.bg
                         )}
                     >

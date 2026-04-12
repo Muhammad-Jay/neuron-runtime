@@ -1,42 +1,54 @@
 import { Router } from "express";
 import {
     addNodeController,
-    createWorkflowController, executeWorkflowController, fetchWorkflowGraphController,
-    getWorkflowController, getWorkflowFullStateController, saveWorkflowGraphController,
-    // executeWorkflowController
+    createWorkflowController,
+    executeWorkflowController,
+    getWorkflowController,
+    getWorkflowFullStateController,
+    saveWorkflowGraphController,
 } from "../controllers/workflow.controllers";
-import {authenticate} from "../middleware/supabaseAuth";
-import {getWorkflowById, getWorkflowGraph, saveWorkflowGraph} from "../services/repository/workflow.repository";
+import {
+    createWorkspaceController,
+    getWorkspacesController,
+    updateWorkspaceController,
+    deleteWorkspaceController,
+    assignWorkflowToWorkspaceController
+} from "../controllers/workspace.controller";
+import { authenticate } from "../middleware/supabaseAuth";
 import {
     deleteDeploymentController,
-    deployWorkflowController, executeDeployedWorkflowController,
+    deployWorkflowController,
     getDeploymentController
 } from "../controllers/deploy.workflow.controller";
-import {requireKey} from "../middleware/auth";
 
 const router = Router();
 
-// Get workflows
-router.get("/", authenticate, getWorkflowController);
+// --- Global Middleware ---
+// Protects all routes defined below this line
+router.use(authenticate);
 
-// Create a workflow
-router.post("/", authenticate, createWorkflowController);
+// --- Core Workflows ---
+router.get("/", getWorkflowController);
+router.post("/", createWorkflowController);
 
-router.get("/:workflowId/graph", authenticate, getWorkflowFullStateController);
+// --- Graph & State Management ---
+router.get("/:workflowId/graph", getWorkflowFullStateController);
+router.post("/:workflowId/graph", saveWorkflowGraphController);
+router.post("/:workflowId/nodes", addNodeController);
 
-router.post("/:workflowId/graph", authenticate, saveWorkflowGraphController);
+// --- Execution & Deployment ---
+router.get("/execute/:workflowId", executeWorkflowController);
+router.post("/deploy/:workflowId", deployWorkflowController);
+router.get("/deploy/:workflowId", getDeploymentController);
+router.delete("/deploy/:workflowId", deleteDeploymentController);
 
-router.post("/:workflowId/nodes", authenticate, addNodeController);
+// --- Workspace / Grouping Management ---
+router.get("/workspaces", getWorkspacesController);
+router.post("/workspaces", createWorkspaceController);
+router.patch("/workspaces/:id", updateWorkspaceController);
+router.delete("/workspaces/:id", deleteWorkspaceController);
 
-// Get a workflow by ID
-// router.get("/:id", authenticate, getWorkflowById);
-
-// Execute a workflow
-router.get("/execute/:workflowId", authenticate, executeWorkflowController);
-
-// Deploy a workflow
-router.post("/deploy/:workflowId", authenticate, deployWorkflowController);
-router.get("/deploy/:workflowId", authenticate, getDeploymentController);
-router.delete("/deploy/:workflowId", authenticate, deleteDeploymentController);
+// Drag & Drop action
+router.post("/workspaces/assign-workflow", assignWorkflowToWorkspaceController);
 
 export default router;

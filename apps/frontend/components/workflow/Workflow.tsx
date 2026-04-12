@@ -1,53 +1,40 @@
 'use client';
 
-import { WorkflowCard } from '@/components/workflow/WorkflowCard';
 import { WorkflowLoadingSkeleton } from '@/components/workflow/WorkflowLoadingSkeleton';
 import { WorkflowErrorState } from '@/components/workflow/WorkflowErrorState';
-import { Button } from '@/components/ui/button';
 import { useWorkflows } from '@/hooks/workflow/useWorkflows';
+import { useWorkspaces } from '@/hooks/workspace/useWorkspace'; // New
 import { WorkflowsHeader } from '@/components/workflow/WorkflowsHeader';
+import { WorkspaceContainer } from '@/components/workflow/workspace/WorkspaceContainer';
 import { useRouter } from 'next/navigation';
-import { useSidebar } from '@/components/ui/sidebar';
-import { cn } from '@/lib/utils';
 
-export default function Workflow() {
-  const router = useRouter();
-  const { open } = useSidebar();
-  const {
-    workflows,
-    isWorkflowLoading,
-    workflowErrors,
-    createWorkflow,
-    deleteWorkflow,
-  } = useWorkflows();
+export default function WorkflowPage() {
+    const router = useRouter();
+    const { workspaces, isLoading: isWorkspaceLoading } = useWorkspaces();
+    const {
+        workflows,
+        isWorkflowLoading,
+        workflowErrors,
+        deleteWorkflow,
+    } = useWorkflows();
 
-  return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-0 lg:p-5">
-      <WorkflowsHeader />
+    const isLoading = isWorkflowLoading || isWorkspaceLoading;
 
-      {isWorkflowLoading ? (
-        <WorkflowLoadingSkeleton />
-      ) : workflowErrors ? (
-        <WorkflowErrorState message={workflowErrors} />
-      ) : (
-        <div
-          className={cn(
-            'grid auto-rows-min grid-cols-1 gap-4 space-y-3.5 sm:grid-cols-2 md:grid-cols-4',
-            open && 'md:grid-cols-3'
-          )}
-        >
-          {workflows.map((workflow) => (
-            <WorkflowCard
-              key={workflow.id}
-              workflow={workflow}
-              deleteAction={deleteWorkflow}
-              clickAction={async (id) => {
-                router.push(`/editor/${id}`);
-              }}
-            />
-          ))}
+    return (
+        <div className="flex flex-1 flex-col gap-6 p-4 pt-0 lg:p-5">
+            <WorkflowsHeader />
+
+            {isLoading ? (
+                <WorkflowLoadingSkeleton />
+            ) : workflowErrors ? (
+                <WorkflowErrorState message={workflowErrors} />
+            ) : (
+                <WorkspaceContainer
+                    workflows={workflows}
+                    deleteWorkflow={deleteWorkflow}
+                    onCardClick={(id) => router.push(`/editor/${id}`)}
+                />
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 }

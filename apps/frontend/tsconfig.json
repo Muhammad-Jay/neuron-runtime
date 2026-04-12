@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@neuron/shared": ["../packages/shared/src/index.ts"],
     }
   },
   "references": [{ "path": "./shared" }, { "path": "./backend" }],

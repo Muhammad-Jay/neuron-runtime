@@ -9,6 +9,7 @@ import authRoutes from "./routes/auth.routes.js";
 import secretRoutes from "./routes/vault.route";
 import deploymentRoutes from "./routes/deployment.route";
 import executionRoute from "./routes/execution.route";
+import workspaceRoute from "./routes/workspace.route";
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use('/api/v1/workflows/:id/graph', saveLimiter);
 // Mount your routes under paths
 app.use("/test", testRoute);
 app.use("/api/v1/workflows", workflowRoutes);
+app.use('/api/v1/workspaces',workspaceRoute);
 app.use("/api/v1/auth", authRoutes);
 app.use('/api/v1/secrets', secretRoutes);
 app.use('/api/v1/execute/workflow', deploymentRoutes);

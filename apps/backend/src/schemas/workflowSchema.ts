@@ -10,6 +10,7 @@ import {relations} from "drizzle-orm";
 import {workflowNodes} from "./workflowNodes";
 import {workflowEdges} from "./workflowEdges";
 import {executions} from "./executionSchema";
+import {workspaces} from "./workspaceSchema";
 
 export const workflowStatusEnum = pgEnum("workflow_status", [
     "draft",
@@ -26,6 +27,8 @@ export const workflows = pgTable("workflows", {
     userId: uuid('user_id')
         .notNull()
         .references(() => users.id, { onDelete: 'cascade' }),
+
+    workspaceId: uuid('workspace_id').references(() => workspaces.id, { onDelete: 'set null' }),
 
     name: text("name")
         .notNull(),

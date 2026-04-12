@@ -15,6 +15,13 @@
       "when": 1775681019726,
       "tag": "0001_cuddly_the_order",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1775954079335,
+      "tag": "0002_tearful_maximus",
+      "breakpoints": true
     }
   ]
 }

@@ -61,8 +61,8 @@ export function DynamicNodeToolbar({
       <TooltipProvider delayDuration={0}>
         <div
           className={cn(
-            'flex items-center gap-2',
-            'rounded-md border border-neutral-800 bg-neutral-800/50 p-1 backdrop-blur-md',
+            'flex items-center gap-3',
+            'rounded-md border border-neutral-800 bg-neutral-700/25 p-2 backdrop-blur-md',
             'animate-in fade-in zoom-in-95 duration-200'
           )}
         >
@@ -83,12 +83,12 @@ export function DynamicNodeToolbar({
           />
 
           {/* DELETE ACTION */}
-          <ToolbarButton
-            onClick={handleDelete}
-            icon={<Trash2 className="text-xs! text-red-400" />}
-            label="Delete"
-            className="hover:bg-red-500/10"
-          />
+          {/*<ToolbarButton*/}
+          {/*  onClick={handleDelete}*/}
+          {/*  icon={<Trash2 className="text-xs! text-red-400" />}*/}
+          {/*  label="Delete"*/}
+          {/*  className="hover:bg-red-500/10"*/}
+          {/*/>*/}
 
           {/* Node Preview */}
           <NodePreview

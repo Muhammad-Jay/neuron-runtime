@@ -6,7 +6,7 @@ import type {
   GlobalVariable,
   WorkflowNode,
   WorkflowEdge,
-} from '@neuron/shared';
+} from '@neuron/shared'
 
 const URL = process.env.NEXT_PUBLIC_API_ENDPOINT! as string;
 
