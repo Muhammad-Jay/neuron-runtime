@@ -16,7 +16,7 @@ export const WorkflowsHeader = () => {
             </div>
 
             {/* Right Side: Actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
                 <CreateWorkspaceDialog />
                 <div className="h-4 w-[1px] bg-white/5 mx-1" />
                 <CreateWorkflowDialog />

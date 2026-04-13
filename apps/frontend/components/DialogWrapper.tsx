@@ -37,7 +37,7 @@ export const DialogWrapper = ({
       <DialogTrigger asChild>{triggerButton}</DialogTrigger>
       <DialogContent
         className={cn(
-          'h-3/4! w-4/5! rounded-xl bg-neutral-800/30 backdrop-blur-md',
+          'h-3/4! w-4/5! rounded-xl bg-neutral-800/35 backdrop-blur-lg',
           className
         )}
       >

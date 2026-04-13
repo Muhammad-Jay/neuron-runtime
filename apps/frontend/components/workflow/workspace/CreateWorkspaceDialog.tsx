@@ -21,6 +21,7 @@ export const CreateWorkspaceDialog = () => {
 
     return (
         <DialogWrapper
+            contentClassName={"h-fit! py-5!"}
             triggerButton={
                 <Button
                     className="h-8 gap-1.5 border-white/5 bg-neutral-900/50 hover:bg-neutral-800"

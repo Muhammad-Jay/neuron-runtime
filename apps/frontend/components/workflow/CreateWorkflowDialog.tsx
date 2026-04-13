@@ -33,7 +33,7 @@ export const CreateWorkflowDialog = () => {
         <DialogWrapper
             triggerButton={
                 <Button className="h-8 gap-1.5 shadow-lg shadow-blue-500/10" variant="default">
-                    <ZapIcon size={14} className="fill-current" />
+                    <PlusIcon size={14} className="fill-current" />
                     <span className="text-xs font-bold">New Workflow</span>
                 </Button>
             }
@@ -50,7 +50,7 @@ export const CreateWorkflowDialog = () => {
                 </Button>
             }
         >
-            <div className="flex w-full flex-col gap-5 p-6 bg-neutral-950">
+            <div className="flex w-full flex-col gap-5 p-6">
                 <div className="space-y-4">
                     <FormField
                         label="Workflow Name"
