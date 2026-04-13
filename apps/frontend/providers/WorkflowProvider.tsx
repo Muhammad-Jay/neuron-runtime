@@ -9,16 +9,13 @@ import {
   useState,
 } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { useRealtime } from '@/hooks/useRealtime';
 import type { NewWorkflowType, WorkflowType } from '@neuron/shared';
 import { NewWorkflowGeneralType, WorkflowAction } from '@/types/workflow';
-import { NewWorkflow } from '../../backend/src/types/workflow/workflow.types';
 import {
   createWorkflowRequest,
   getWorkflowsRequest,
 } from '@/lib/api-client/client';
 import { WorkflowActionType } from '@/constants';
-import { nanoid } from 'nanoid';
 import { useAuth } from '@/hooks/useAuth';
 import { toWorkflowTableSchema } from '@/lib/utils';
 
@@ -182,34 +179,6 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
       console.error(err.message);
     }
   };
-
-  useEffect(() => {
-    fetchWorkflows();
-  }, [fetchWorkflows]);
-
-  // useRealtime("workflows", (payload) => {
-  //     if (payload.eventType === "INSERT") {
-  //         workflowsDispatcher({
-  //             type: WorkflowActionType.ADD_WORKFLOW,
-  //             payload: payload.new
-  //         })
-  //     }
-  //
-  //     if (payload.eventType === "UPDATE") {
-  //         workflowsDispatcher({
-  //             type: WorkflowActionType.UPDATE_WORKFLOW,
-  //             id: payload.new.id,
-  //             payload: payload.new
-  //         });
-  //     }
-  //
-  //     if (payload.eventType === "DELETE") {
-  //         workflowsDispatcher({
-  //             type: WorkflowActionType.DELETE_WORKFLOW,
-  //             id: payload.old.id,
-  //         })
-  //     }
-  // })
 
   return (
     <WorkflowContext.Provider

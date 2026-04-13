@@ -8,11 +8,11 @@ import { WorkflowCard } from '../WorkflowCard';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/components/ui/sidebar';
 import { DndContext, DragEndEvent } from '@dnd-kit/core';
-import {WorkflowActionsDropdown} from "@/components/workflow/WorkflowActionsDropdown";
 import {WorkspaceCard} from "@/components/workflow/workspace/WorkspaceCard";
+import {WorkflowType} from "@neuron/shared";
 
 interface WorkspaceContainerProps {
-    workflows: any[];
+    workflows: WorkflowType[];
     deleteWorkflow: (id: string) => Promise<void>;
     onCardClick: (id: string) => void;
 }

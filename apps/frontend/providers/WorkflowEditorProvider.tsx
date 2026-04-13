@@ -103,7 +103,7 @@ export type WorkflowEditorContextType = {
 export interface IWorkflowEditorState {
   workflowId: string;
   graph: WorkflowDefinition;
-  workflow: WorkflowType;
+  workflow: Partial<WorkflowType>;
   runtime: {
     nodeStatus: Record<string, 'idle' | 'running' | 'success' | 'error'>;
     nodeOutputs: Record<string, any> | null;

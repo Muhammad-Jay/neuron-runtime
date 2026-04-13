@@ -31,7 +31,7 @@
     "@floating-ui/react": "^0.27.19",
     "@headlessui/react": "^2.2.9",
     "@lezer/highlight": "^1.2.3",
-    "@neuron/shared": "*",
+    "@neuron/shared": "workspace:*",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@supabase/ssr": "^0.7.0",

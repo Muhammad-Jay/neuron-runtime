@@ -1,0 +1,34 @@
+{
+  "name": "@neuron/nodes-sdk",
+  "version": "1.0.0",
+  "description": "Neuron Node SDK - extensible workflow node system",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "dev": "tsup src/index.ts --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@neuron/shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "@neuron/shared": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.39",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}

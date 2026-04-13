@@ -7,14 +7,21 @@
     "packages/*"
   ],
   "scripts": {
+    "clean": "rm -rf **/dist",
     "build:shared": "npm run build -w @neuron/shared",
+    "build:nodes-sdk": "npm run build -w @neuron/nodes-sdk",
     "build:backend": "npm run build -w backend",
-    "build": "npm run build:shared && npm run build:backend",
+
+    "build": "npm run build:shared && npm run build:nodes-sdk && npm run build:backend",
+
     "dev:backend": "npm run dev -w backend",
     "dev:frontend": "npm run dev -w frontend"
   },
   "license": "ISC",
   "devDependencies": {
     "typescript": "^6.0.2"
+  },
+  "dependencies": {
+    "lucide-react": "^1.8.0"
   }
 }

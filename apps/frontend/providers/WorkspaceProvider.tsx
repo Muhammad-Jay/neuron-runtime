@@ -12,12 +12,13 @@ import { toast } from 'sonner';
 import {useWorkflows} from "@/hooks/workflow/useWorkflows";
 import {getWorkflowsRequest} from "@/lib/api-client/client";
 import {WorkflowActionType} from "@/constants";
+import {WorkflowType} from "@neuron/shared";
 
 interface Workspace {
     id: string;
     name: string;
     description?: string;
-    workflows: Record<string, any>; // Nested Record for O(1) workflow access
+    workflows: Record<string, WorkflowType>; // Nested Record for O(1) workflow access
 }
 
 type WorkspaceRecord = Record<string, Workspace>;
@@ -28,8 +29,8 @@ interface WorkspaceContextType {
     refreshWorkspaces: () => Promise<void>;
     createWorkspace: (name: string, description?: string) => Promise<void>;
     deleteWorkspace: (id: string) => Promise<void>;
-    assignWorkflow: (workflowId: string, workspaceId: string | null, workflow?: any) => Promise<void>;
-    setWorkflowInWorkspace: (workflowId: string, workspaceId: string | null, workflow?: any) => void;
+    assignWorkflow: (workflowId: string, workspaceId: string | null, workflow: WorkflowType) => Promise<void>;
+    setWorkflowInWorkspace: (workflowId: string, workspaceId: string | null, workflow: WorkflowType) => void;
 }
 
 export const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
@@ -122,7 +123,7 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
     const setWorkflowInWorkspace = useCallback((
         workflowId: string,
         workspaceId: string | null,
-        workflow?: any
+        workflow: WorkflowType
     ) => {
         setWorkspaces(prev => {
             const next = { ...prev };
@@ -157,7 +158,7 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
     const assignWorkflow = useCallback(async (
         workflowId: string,
         workspaceId: string | null,
-        workflow?: any
+        workflow: WorkflowType
     ) => {
         if (!token) return;
 

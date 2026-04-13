@@ -3,10 +3,11 @@
 import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { cn } from '@/lib/utils';
+import {WorkflowType} from "@neuron/shared";
 
 interface DraggableWorkflowWrapperProps {
     id: string;
-    workflow: any; // Use WorkflowType
+    workflow: WorkflowType; // Use WorkflowType
     children: React.ReactNode;
 }
 

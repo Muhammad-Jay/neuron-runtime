@@ -8,6 +8,7 @@ export type WorkflowType = {
     name: string;
     description: string;
     isActive?: boolean;
+    workspaceId: string | null;
     status: workflowStatus;
     runs?: number;
     userId?: string;
