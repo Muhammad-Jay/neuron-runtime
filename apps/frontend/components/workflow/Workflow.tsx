@@ -10,15 +10,12 @@ import { useRouter } from 'next/navigation';
 
 export default function WorkflowPage() {
     const router = useRouter();
-    const { isLoading: isWorkspaceLoading } = useWorkspaces();
+    const { isLoading } = useWorkspaces();
     const {
         workflows,
-        isWorkflowLoading,
         workflowErrors,
         deleteWorkflow,
     } = useWorkflows();
-
-    const isLoading = isWorkflowLoading || isWorkspaceLoading;
 
     return (
         <div className="flex flex-1 flex-col gap-6 p-4 pt-0 lg:p-5">
