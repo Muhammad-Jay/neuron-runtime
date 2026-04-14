@@ -23,9 +23,9 @@ export const WorkspaceGroup = ({ id, title, count, children }: WorkspaceGroupPro
             <div
                 ref={setNodeRef}
                 className={cn(
-                    "relative aspect-[4/3] w-full overflow-hidden transition-all duration-300",
-                    "rounded-2xl bg-muted/40 border border-white/[0.03]",
-                    "hover:bg-muted/60 hover:border-white/10 hover:shadow-2xl hover:shadow-black/20",
+                    "relative aspect-[4/3] w-full transition-all duration-300",
+                    "rounded-2xl bg-muted/50 border border-white/[0.05]",
+                    "hover:bg-muted/65 hover:border-white/15 hover:shadow-2xl hover:shadow-black/20",
                     isOver && "bg-muted/80 border-white/40 scale-[1.02]"
                 )}>
                 {/* Visual Glassmorphism highlight */}

@@ -18,7 +18,8 @@ interface Workspace {
     id: string;
     name: string;
     description?: string;
-    workflows: Record<string, WorkflowType>; // Nested Record for O(1) workflow access
+    workflows: Record<string, WorkflowType>;
+    createdAt: Date;
 }
 
 type WorkspaceRecord = Record<string, Workspace>;

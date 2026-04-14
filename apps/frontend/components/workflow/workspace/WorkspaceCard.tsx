@@ -29,7 +29,7 @@ export const WorkspaceCard = ({
     const workflowCount = workflowList.length;
 
     // 1. Setup Droppable logic for this workspace
-    const { setNodeRef, isOver } = useDroppable({
+    const { setNodeRef } = useDroppable({
         id: workspace.id,
     });
 
@@ -37,8 +37,7 @@ export const WorkspaceCard = ({
         <div
             ref={setNodeRef}
             className={cn(
-                "relative rounded-xl transition-all duration-300",
-                isOver && "ring-2 ring-primary/50 bg-blue-500/5 scale-[1.01] z-10"
+                "relative rounded-xl transition-all duration-300"
             )}
         >
             <WorkspaceGroup
@@ -58,7 +57,7 @@ export const WorkspaceCard = ({
                                 <div
                                     className={cn(
                                         "group/wf relative flex flex-col justify-between overflow-hidden rounded-xl p-3 transition-all duration-300 cursor-pointer h-full w-full",
-                                        "bg-muted/40 border border-white/[0.03] hover:bg-neutral-900 hover:border-white/10 hover:shadow-lg"
+                                        "bg-muted/65 border border-white/[0.05] hover:bg-neutral-800/60 hover:border-white/15 hover:shadow-lg"
                                     )}
                                     onClick={(e) => {
                                         e.stopPropagation();

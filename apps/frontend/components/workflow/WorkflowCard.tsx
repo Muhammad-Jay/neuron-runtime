@@ -47,7 +47,7 @@ export const WorkflowCard = ({
                     e.stopPropagation();
                     handleClick();
                 }}
-                className="flex items-start cursor-pointer rounded-md p-1 gap-3 hover:bg-neutral-800/40 transition-colors"
+                className="flex items-start cursor-pointer rounded-md p-1 gap-3 group-hover:bg-neutral-800/40 transition-colors"
             >
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-neutral-800/50">
                     <FileText className="h-4 w-4 text-neutral-400" />
@@ -68,7 +68,7 @@ export const WorkflowCard = ({
                     e.stopPropagation();
                     handleClick();
                 }}
-                className="flex flex-wrap cursor-pointer items-center rounded-md p-2 gap-4 pt-1 hover:bg-neutral-800/40 transition-colors"
+                className="flex flex-wrap cursor-pointer items-center rounded-md p-2 gap-4 pt-1 group-hover:bg-neutral-800/40 transition-colors"
             >
                 <div className="flex items-center gap-1.5 text-neutral-500">
                     <Calendar className="h-3 w-3" />

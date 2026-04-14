@@ -121,15 +121,15 @@ const UnassignedDropZone = ({ workflows, onCardClick, deleteWorkflow }: any) => 
         <div
             ref={setNodeRef}
             className={cn(
-                "mt-8 rounded-2xl p-4 transition-colors duration-300",
-                isOver ? "bg-blue-500/5 ring-1 ring-primary/20" : "bg-transparent"
+                "mt-8 rounded-2xl p-4 gap-5! transition-colors duration-300",
+                isOver ? "bg-muted/70 border-white/30 border-1" : "bg-transparent"
             )}
         >
 
             <h2 className="text-xs font-bold tracking-[0.3em] text-neutral-500 uppercase">
                 <span className="text-neutral-200">Workflows</span>
             </h2>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid mt-10 md:mt-15! grid-cols-1 min-h-[100px] gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {workflows.map((wf: any) => (
                     <DraggableWorkflowWrapper key={wf.id} id={wf.id} workflow={wf}>
                         <WorkflowCard

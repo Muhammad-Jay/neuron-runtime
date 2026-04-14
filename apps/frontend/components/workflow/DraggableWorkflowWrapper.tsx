@@ -37,7 +37,7 @@ export const DraggableWorkflowWrapper = ({
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
         // Disable transitions while dragging to prevent "laggy" following
         transition: isDragging ? 'none' : 'transform 200ms cubic-bezier(0.2, 0, 0, 1)',
-            zIndex: 999,
+        zIndex: isDragging ? 999 : undefined,
         position: 'relative',
     } : undefined;
 
@@ -51,7 +51,7 @@ export const DraggableWorkflowWrapper = ({
             // the 'over' detection on drop targets
             className={cn(
                 "relative group touch-none",
-                isDragging && "cursor-grabbing scale-[1.05] opacity-50 grayscale-[0.5] shadow-2xl"
+                isDragging && "cursor-grabbing z-[999]! scale-[1.05] opacity-70 grayscale-[0.5] shadow-2xl"
             )}
         >
             {children}
