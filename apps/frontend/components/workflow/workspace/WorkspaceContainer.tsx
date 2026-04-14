@@ -68,7 +68,7 @@ export const WorkspaceContainer = ({
         // Determine target workspace (null means unassigned/general)
         const targetWorkspaceId = destinationId === 'general' ? null : destinationId;
 
-       
+
         setWorkflowInWorkspace(workflowId, targetWorkspaceId, workflowData);
 
         // Sync with Backend
@@ -122,11 +122,12 @@ const UnassignedDropZone = ({ workflows, onCardClick, deleteWorkflow }: any) => 
             ref={setNodeRef}
             className={cn(
                 "mt-8 rounded-2xl p-4 transition-colors duration-300",
-                isOver ? "bg-blue-500/5 ring-1 ring-blue-500/20" : "bg-transparent"
+                isOver ? "bg-blue-500/5 ring-1 ring-primary/20" : "bg-transparent"
             )}
         >
-            <h2 className="mb-6 text-sm font-bold tracking-[0.2em] text-neutral-500 uppercase">
-                Unassigned Workflows
+
+            <h2 className="text-xs font-bold tracking-[0.3em] text-neutral-500 uppercase">
+                <span className="text-neutral-200">Workflows</span>
             </h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {workflows.map((wf: any) => (

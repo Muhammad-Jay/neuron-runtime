@@ -37,7 +37,7 @@ export const DraggableWorkflowWrapper = ({
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
         // Disable transitions while dragging to prevent "laggy" following
         transition: isDragging ? 'none' : 'transform 200ms cubic-bezier(0.2, 0, 0, 1)',
-        zIndex: isDragging ? 999 : undefined,
+            zIndex: 999,
         position: 'relative',
     } : undefined;
 
