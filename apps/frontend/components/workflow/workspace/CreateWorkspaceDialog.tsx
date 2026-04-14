@@ -21,6 +21,7 @@ export const CreateWorkspaceDialog = () => {
 
     return (
         <DialogWrapper
+            className={"h-fit! md:w-3/6!"}
             contentClassName={"h-fit! py-5!"}
             triggerButton={
                 <Button

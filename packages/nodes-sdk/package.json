@@ -21,7 +21,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@neuron/shared": "file:../../packages/shared"
+    "@neuron/shared": "file:../../packages/shared",
+    "@neuron/node-http-request": "file:../../packages/nodes/node-http-request"
   },
   "peerDependencies": {
     "@neuron/shared": "*"

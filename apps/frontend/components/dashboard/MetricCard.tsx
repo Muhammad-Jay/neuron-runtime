@@ -14,7 +14,7 @@ export function MetricCard({
   return (
     <div
       className={cn(
-        'bg-muted/50 transition-200 min-h-[140px] rounded-2xl border border-white/10 p-5 backdrop-blur-xl hover:bg-white/[0.05]',
+        'bg-muted/70 transition-200 min-h-[140px] rounded-2xl border border-white/13 p-5 backdrop-blur-xl hover:bg-white/[0.10]',
         className
       )}
     >

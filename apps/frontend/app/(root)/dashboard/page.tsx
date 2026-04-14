@@ -45,7 +45,7 @@ export default function DashboardPage() {
             title="Active Sessions"
             value={metrics?.running ?? 0}
             subtitle="Processes currently in-flight"
-            className="bg-primary/[0.02] border-primary/10 h-full justify-center"
+            className="h-full justify-center"
           />
           {/* Placeholder for future specific metric */}
           <div className="group flex h-full flex-col justify-end rounded-2xl border border-white/[0.05] bg-white/[0.01] p-6 transition-all hover:bg-white/[0.02]">

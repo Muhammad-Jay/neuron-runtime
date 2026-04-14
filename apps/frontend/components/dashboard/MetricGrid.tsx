@@ -6,7 +6,6 @@ export function MetricGrid({ metrics }: { metrics: any }) {
       <MetricCard
         title="Total Runs"
         value={metrics?.total ?? 0}
-        className="bg-white/[0.02]"
       />
       <MetricCard
         title="Successful Cycles"

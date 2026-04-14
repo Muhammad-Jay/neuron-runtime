@@ -62,7 +62,7 @@ export function DashboardChart({ data }: { data: Execution[] }) {
   }, [data]);
 
   return (
-    <div className="flex w-full flex-col overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.01] backdrop-blur-3xl transition-all duration-500 hover:border-white/[0.1]">
+    <div className="flex w-full flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-muted/70 backdrop-blur-3xl transition-all duration-500 hover:border-white/[0.3]">
       <div className="flex items-center justify-between p-6 pb-0">
         <div>
           <h3 className="text-sm font-bold tracking-[0.2em] text-neutral-500 uppercase">

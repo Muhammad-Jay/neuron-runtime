@@ -39,7 +39,7 @@ export const WorkspaceActionsDropdown = ({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 rounded-md text-neutral-500 hover:bg-neutral-800 hover:text-white transition-colors"
+                    className="h-7 w-7 rounded-md text-neutral-500 hover:text-white transition-colors"
                     onClick={(e) => e.stopPropagation()}
                 >
                     <MoreVertical className="h-3.5 w-3.5 text-neutral-500 hover:text-white" />

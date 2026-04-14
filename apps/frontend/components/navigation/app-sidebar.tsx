@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/sidebar';
 import { NavRoutes } from '@/components/navigation/nav-routes';
 import { useAuth } from '@/hooks/useAuth';
+import {NavWorkspaces} from "@/components/navigation/nav-workspace";
 
 const data = {
     routes: [

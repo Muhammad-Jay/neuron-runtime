@@ -51,12 +51,12 @@ export function NavWorkspaces() {
                             <a href={`/dashboard/workflows/${workspace.id}`} className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <Layers className="h-4 w-4 text-neutral-400 group-hover/item:text-white transition-colors" />
-                                    <span className="truncate font-medium text-neutral-300 group-hover/item:text-white">
+                                    <span className="truncate max-w-[80%]! font-medium text-neutral-300 group-hover/item:text-white">
                     {workspace.name}
                   </span>
                                 </div>
                                 {/* Counter for workflows */}
-                                <span className="mr-6 text-[10px] font-bold text-neutral-600 group-hover/item:text-neutral-400 transition-colors">
+                                <span className="mr-8 text-[10px] font-bold text-neutral-600 group-hover/item:text-neutral-400 transition-colors">
                   {Object.keys(workspace.workflows || {}).length}
                 </span>
                             </a>
