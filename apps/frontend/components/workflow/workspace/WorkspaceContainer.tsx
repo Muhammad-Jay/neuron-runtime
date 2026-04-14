@@ -57,17 +57,27 @@ export const WorkspaceContainer = ({
 
     async function handleDragEnd(event: DragEndEvent) {
         const { active, over } = event;
+
+        // If dropped nowhere, do nothing
         if (!over) return;
 
         const workflowId = active.id as string;
-        const destinationId = over.id as string;
+        const destinationId = over.id as string; // Workspace ID or 'general'
         const workflowData = active.data.current?.workflow;
 
-        // "general" target refers to unassigning the workflow
-        const workspaceId = destinationId === 'general' ? null : destinationId;
+        // Determine target workspace (null means unassigned/general)
+        const targetWorkspaceId = destinationId === 'general' ? null : destinationId;
 
-        setWorkflowInWorkspace(workflowId, workspaceId, workflowData);
-        await assignWorkflow(workflowId, workspaceId, workflowData);
+       
+        setWorkflowInWorkspace(workflowId, targetWorkspaceId, workflowData);
+
+        // Sync with Backend
+        try {
+            await assignWorkflow(workflowId, targetWorkspaceId, workflowData);
+        } catch (error) {
+            // WorkspaceContext should handle the rollback if this fails
+            console.error("Failed to move workflow:", error);
+        }
     }
 
     return (
